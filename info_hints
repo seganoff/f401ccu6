@@ -1,3 +1,27 @@
+"The best way to learn something is to do so empirically – not taking anyone's
+word on anything at all, but trying it out and experiencing it for yourself."
+(Kaiwan N Billimoria, linux kernel programming first & second book edition)
+
+lib/stm32/f4/rcc.c
+const struct rcc_clock_scale rcc_hse_25mhz_3v3[RCC_CLOCK_3V3_END] = {
+	{ /* 84MHz */
+		.pllm = 25,
+		.plln = 336,
+		.pllp = 4,
+		.pllq = 7,
+		.pllr = 0,
+		.pll_source = RCC_CFGR_PLLSRC_HSE_CLK,
+		.hpre = RCC_CFGR_HPRE_NODIV,
+		.ppre1 = RCC_CFGR_PPRE_DIV2,
+		.ppre2 = RCC_CFGR_PPRE_NODIV,
+		.voltage_scale = PWR_SCALE1,
+		.flash_config = FLASH_ACR_DCEN | FLASH_ACR_ICEN |
+				FLASH_ACR_LATENCY_2WS,
+		.ahb_frequency  = 84000000,
+		.apb1_frequency = 42000000,
+		.apb2_frequency = 84000000,
+	},
+
 bluepill into st-link + blackmagic debug probe
 https://microcontrollerelectronics.com/how-to-convert-an-stm32f103c8t6-into-a-black-magic-probe/
 https://black-magic.org/hardware.html
