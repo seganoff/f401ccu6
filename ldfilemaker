@@ -1,0 +1,26 @@
+# make -f <thisFile> (TAB-autocompl) generated.stm32f401ccu6.ld
+# LDSCRIPT	=      generated.$(DEVICE).ld //genlink-config.mk
+#arm-none-eabi-gcc -E -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32F4 -DSTM32F401CCU6 -D_ROM=256K -D_RAM=64K -D_ROM_OFF=0x08000000 -D_RAM_OFF=0x20000000 -P -E libopencm3/ld/linker.ld.S -o generated.stm32f401ccu6.ld
+
+DEVICE          = stm32f401ccu6
+#DEVICE          = stm32f767zit6u
+OPENCM3_DIR     = ./libopencm3
+#OBJS            += foo.o
+
+CFLAGS          += -Os -ggdb3
+CPPFLAGS	+= -MD
+LDFLAGS         += -static -nostartfiles
+LDLIBS          += -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
+
+include $(OPENCM3_DIR)/mk/genlink-config.mk
+include $(OPENCM3_DIR)/mk/gcc-config.mk
+
+.PHONY: clean all
+
+all: binary.elf binary.hex
+
+clean:
+	$(Q)$(RM) -rf binary.* *.o
+
+include $(OPENCM3_DIR)/mk/genlink-rules.mk
+include $(OPENCM3_DIR)/mk/gcc-rules.mk
