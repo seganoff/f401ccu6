@@ -2,25 +2,31 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
+////<C-q u hex> 00bf -v unix -q pinche wsl
+
+/// ¿comprendable 4 everybody?¿
 /* Library includes. */
 /* #include "stm32f10x_lib.h" */
 
+//// from 0. + better explained
+/* Here is a good place to include header files that are required across
+   your application.
+#include "something.h"
+*/
+
 /*-----------------------------------------------------------
- * Application specific definitions.
- *
- * These definitions should be adjusted for your particular hardware and
- * application requirements.
- *
- * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
- * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE. 
- *
- * See http://www.freertos.org/a00110.html.
+* 0. https://www.freertos.org/Documentation/02-Kernel/03-Supported-devices/02-Customization
+* 1. <rtos kernel git sysroot >/ examples/template_configuration/FreeRTOSConfig.h every define doxyCommented
  *----------------------------------------------------------*/
 
 #define configUSE_PREEMPTION			1
 #define configUSE_IDLE_HOOK			0
 #define configUSE_TICK_HOOK			0
+///hsi16m lsi32k hse25m lse32.768k blackpill
 #define configCPU_CLOCK_HZ			( ( unsigned long ) 84000000 )	
+///// tha 8 is not aMagicNumber, rm0368rev5 inkPage94/847 Figure 12. Clock tree + foll. page /////
+///The RCC feeds the external clock of the Cortex System Timer (SysTick) with the AHB clock
+///(HCLK) divided by 8
 #define configSYSTICK_CLOCK_HZ ( configCPU_CLOCK_HZ / 8 )  /* fix for vTaskDelay() */
 #define configTICK_RATE_HZ			( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES			( 5 )
