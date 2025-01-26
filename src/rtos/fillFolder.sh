@@ -2,8 +2,8 @@
 #rm *.h *.c ; sh fillFolder.sh && ll && cat opencm3.c
 # 01-Beginners-guide/03-Build-your-first-project#optional-source-files
 # clone https://github.com/FreeRTOS/FreeRTOS-Kernel.git $sysroot
-dest='./' #arg
-sysroot='/home/u262d/githubs/stm/FreeRTOS-Kernel/' #arg
+dest='./' #no arg, just copy over here
+sysroot='./../../rtos_sysroot/' #repos_root dir
 compiler='GCC' #arg
 mcu='ARM_CM4F' #arg
 ports="${sysroot}portable/${compiler}/${mcu}/"
@@ -31,4 +31,3 @@ void sys_tick_handler(void){xPortSysTickHandler();}
 /* end opncm3.c */"
 
 echo -n "${opencm3}" > opencm3.c
-#tee ./opencm3.c <<<$opencm3

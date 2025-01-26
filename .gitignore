@@ -1,3 +1,5 @@
-pat.private
 gh.priv
 *.swp
+libopencm3/*
+rtos_sysroot/*
+
