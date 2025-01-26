@@ -52,3 +52,13 @@ unplug usb & connect via SWD
 turn off write protected sectors
 openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c "init" -c "halt" -c "stm32f1x unlock 0" -c "shutdown"
 optionaly erase & flash some miniklink. st-flash --debug erase
+
+## include macros, too many, really all needed, especially if i dont wanna use libwwg
+ll /opt/gcc-arm/arm-none-eabi/include/ #included <headers.h>
+01-FreeRTOS-quick-start/01-Beginners-guide/03-Build-your-first-project#optional-source-files
+
+## bitter reality
+0. why it feels so FRUSTRATING reading any of STM docs?
+  > oh u feel uncomfy? da how many chips u order per month/year...
+1. where are the arch_flags officially documented in STM docs
+  > sure they are officially documented by gcc and arm
