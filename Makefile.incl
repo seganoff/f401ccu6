@@ -147,10 +147,11 @@ clobber: clean
 dfuflash: $(BINARY).bin
 	dfu-util -a 0 -D $(BINARY).bin -s 0x08000000
 stflash: $(BINARY).bin
-	st-flash --debug write $(BINARY).bin 0x08000000
-all: elf bin
+	st-flash write $(BINARY).bin 0x08000000
+#all: elf bin
+#rebuild: clobber all
 
-.PHONY: images clean elf bin hex srec list all dfuflash stflash
+.PHONY: images clean elf bin hex srec list all dfuflash stflash rebuild
 
 -include $(OBJS:.o=.d)
 
