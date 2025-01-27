@@ -1,4 +1,4 @@
 *.swp
 libopencm3/*
 rtos_sysroot/*
-
+cdc_hdlc/rtos/*
