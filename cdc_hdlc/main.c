@@ -1,4 +1,6 @@
-/* USBCDC Example (adventure) Warren Gay
+/* usbipd list (--help)
+ *   bind --busid x-y (admin mode)
+ *   attach --wsl --busid x-y (detach)
  */
 #include <FreeRTOS.h>
 #include <task.h>
@@ -14,23 +16,25 @@
 //static SemaphoreHandle_t sem_flash = 0;
 
 static void counter(void *arg __attribute__((unused))) {
-int userChar = usb_getc();//user connect
+//int userChar = usb_getc();//user connect
+int ch_ = 1;
 while(1)
 {
-//echo back user char, every 400ms
-usb_puts("input was: ");
-usb_putc(userChar);
+//next: encode into hdlc frame & send out
+usb_putc(ch_);
+ch_= (ch_ + 1) % 99;// yeah, 99 percent pwm :)
 vTaskDelay(pdMS_TO_TICKS(400));
-usb_puts("new input \n");
-userChar = usb_getc();
+//usb_puts("new input \n");//userChar = usb_getc();
 }
 }
 
 static void flasher(void *arg __attribute__((unused))) {
 while(1)//for (;;) 
 {
-gpio_toggle(GPIOC,GPIO13);
-vTaskDelay(pdMS_TO_TICKS(500));
+gpio_set(GPIOC,GPIO13);
+vTaskDelay(pdMS_TO_TICKS(2000));
+gpio_clear(GPIOC,GPIO13);
+vTaskDelay(pdMS_TO_TICKS(100));
 }
 }
 
