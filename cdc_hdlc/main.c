@@ -13,16 +13,48 @@
 
 #include "usbcdc.h"
 
+static int encode_frame(const uint8_t *data, uint8_t data_len/*,uint8_t seqNr*/,uint8_t *frame_out) {
+uint8_t byte;//data
+int cout = 0;//deque or vector
+frame_out[cout]=0x7e;cout++;//boundry octet
+while (data_len) {
+byte = *data++;
+//fcs = _crc_ccitt_update(fcs, data);
+if ((byte == 0x7d) || (byte == 0x7e)) { frame_out[cout]=0x7d;cout++;byte^=0x20;}
+frame_out[cout]=byte;cout++;
+data_len--;
+}//while
+frame_out[cout]=0x7e;cout++;
+return cout;
+}
+
 //static SemaphoreHandle_t sem_flash = 0;
+
+static uint32_t crc32(const uint8_t *data,size_t len) {
+uint32_t crc=0xFFFFFFFF;	
+for(size_t i=0;i<len;i++) {
+uint8_t ch=data[i];
+for(size_t j=0;j<8;j++) 
+{uint32_t b=(ch^crc)&1;crc>>=1;if(b) crc=crc^0xEDB88320;ch>>=1;}
+}//outer for loop
+return ~crc;}
+
 
 static void counter(void *arg __attribute__((unused))) {
 //int userChar = usb_getc();//user connect
-int ch_ = 1;
+uint8_t data0[] = {'a','b','c','d','e','f'};
+uint8_t out[8];
+uint32_t frame_length = encode_frame(data0,6,out);
+
 while(1)
 {
-//next: encode into hdlc frame & send out
-usb_putc(ch_);
-ch_= (ch_ + 1) % 99;// yeah, 99 percent pwm :)
+usb_write(out,8);
+//for(int i=0;i<frame_length; i++){
+  //xQueueSend(usb_txq,buf,portMAX_DELAY);
+  //usb_putc(out[i]);
+  //vTaskDelay(pdMS_TO_TICKS(400));
+//}
+//ch_= (ch_ + 1) % 140;
 vTaskDelay(pdMS_TO_TICKS(400));
 //usb_puts("new input \n");//userChar = usb_getc();
 }
@@ -31,10 +63,10 @@ vTaskDelay(pdMS_TO_TICKS(400));
 static void flasher(void *arg __attribute__((unused))) {
 while(1)//for (;;) 
 {
-gpio_set(GPIOC,GPIO13);
-vTaskDelay(pdMS_TO_TICKS(2000));
-gpio_clear(GPIOC,GPIO13);
-vTaskDelay(pdMS_TO_TICKS(100));
+//gpio_set(GPIOC,GPIO13);
+//vTaskDelay(pdMS_TO_TICKS(2000));
+gpio_toggle(GPIOC,GPIO13);
+vTaskDelay(pdMS_TO_TICKS(400));
 }
 }
 

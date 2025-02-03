@@ -144,6 +144,7 @@ clobber: clean
 # Flash 128k Device
 #bigflash: $(BINARY).bin
 #	$(STFLASH) --flash=128k write $(BINARY).bin 0x8000000
+#dfu --reset > still needs ground to R pin to reset properly after "downloading" FW
 dfuflash: $(BINARY).bin
 	dfu-util -a 0 -D $(BINARY).bin -s 0x08000000
 stflash: $(BINARY).bin
