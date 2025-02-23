@@ -1,19 +1,22 @@
-# f401ccu6 empirical approach
+github.com/cpq/bare-metal-programming-guide
+follow along with f401ccu6
+stmDocumentation style is so DEPRESSING, u gotta mention every little detail when citating
 
-checkout template & start newProject
+cpq wording | pinche stm wording
+-------------------------------------
+datasheet   | Reference manual rm0368 rev5
+boardSheet  | UM1974 (nucleo 144-MB1137)
+   _____    | ds9716 rev11
 
-## playing around with blackpill from AZ-delivery, 
-accompanied with ve3wwg stm book.
+16383.to_s(16) > 0x3fff
+bytes: kilo 2**10 1024 | mega 2**20 (1024*1024) 1048576
+32 bit~4 bytes offset +0x4
 
-other usefull books: 
+Introduction: ram region 2.4rm(just the start address & size) 5ds 0x2000[0000-ffff]  & size: 2.3.1rm 64Kbyte
+flash mem mapping 256Kbytes 5ds: 0x0800 0000 - 0x0803 ffff (0x0803_ffff+0x1-0x0800_0000)/1024 > 256 
+ahb1,gpioA 5ds 0x4002_0[000-3ff] 0x400~1024~1kB
 
-by cnoviello > todo: list all mentioned stm documentations
+@ref pm0214 nvic
+table 38 vector table 10rm, 52 interrupt channels + 16 cortex-m4
+boot process cnoviello book for explainations
 
-PacktPublishing/Hands-On-RTOS-with-Microcontrollers > even uses nucleo f767zi,
-but freaking combination: license level 0 of j-link + switching back to st-link under pinche Win only
-possible solution: turn bluepill into st-link & leave jlink on nucleo
-
-hexagon5un > 8-bit avr, but excellent explainations and cool ideas from Elliot Williams.
-I would strongly suggest starting your microcontroller's journey from here, if your totaly new to the topic.
-The one & only time me started ardIDE: to flash "ArduinoAsISP" sketch.
-(ok, gonna use it once more to do the HighVoltage revive attempt of that qfp32 168, resoldered to a breakout from unknown clone)
