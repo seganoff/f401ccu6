@@ -26,6 +26,21 @@ Nevertheless i had lots of headache with that license level 0 jlink, maybe try t
 Actually that UM1974 according using build in st link to program external targets is full of BS (Vdd from Application)
 its possible to use 3v3 line JP1, look @ page 3 in schematics mb1137.pdf
 
+ozone, ok, chapter 6 in brian amos book. New Project, dale .svd .elf + append RTOS aware plugin
+void onprojload(void)
+Project.SetDevice ("STM32F767ZI");Project.SetHostIF ("USB", "778754800");
+Project.SetTargetIF ("SWD");Project.SetTIFSpeed ("4 MHz");
+Project.SetOSPlugin("FreeRTOSPlugin_CM7");//
+
+happy debug. // try converting bluepill st-link into jlink
+ozone level 0 jlink flashes .elf's fine(download to target). refuses to flash .bin though.
+
+$ find /opt -name 'STM32F767.svd'
+/opt/st/stm32cubeide_1.17.0/plugins/com.st.stm32cube.ide.mcu.productdb.debug_2.2.0.202411061604/resources/cmsis/STMicroelectronics_CMSIS_SVD/STM32F767.svd
+/opt/st/stm32cubeclt_1.17.0/STMicroelectronics_CMSIS_SVD/STM32F767.svd
+diff bur would say same files | but not same as in(CAD resources)  hXXps://www.st.com/resource/en/svd/stm32f7-svd.zip
+FU stm, really, thnx for spammin directories
+
 #------------------767zit6--------------------------
 rm0410Rev5
 ds11532Rev8
