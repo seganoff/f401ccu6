@@ -16,6 +16,9 @@ __attribute__((naked, noreturn)) void _reset(void) {
 
 extern void _estack(void);  // Defined in link.ld
 
-// 16 standard and 91 STM32-specific handlers
-__attribute__((section(".vectors"))) void (*const tab[16 + 52/*91*/])(void) = {
+// 16 standard and NN STM32-specific handlers
+// 52 401cc
+// 91 429zi
+// 110 767zi
+__attribute__((section(".vectors"))) void (*const tab[16 + 110])(void) = {
     _estack, _reset};

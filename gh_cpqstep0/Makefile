@@ -1,8 +1,12 @@
 CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
             -Wformat-truncation -fno-common -Wconversion \
             -g3 -Os -ffunction-sections -fdata-sections -I. \
-            -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(EXTRA_CFLAGS)
+            -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16 $(EXTRA_CFLAGS)
+#-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(EXTRA_CFLAGS) # f401ccu6
+#arm-none-eabi-gcc -E -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16 -DSTM32F7
+#-DSTM32F7CCM -DSTM32F767ZIT6 -D_ROM=2048K -D_RAM=384K -D_CCM=128K -D_CCM_OFF=0x20000000 -D_ROM_OFF=0x08000000 -D_RAM_OFF=0x20020000 -P -E linker.ld.S -o f767_linker
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
+#LDFLAGS ?= -Tf767_linker -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
 SOURCES = main.c 
 
 ifeq ($(OS),Windows_NT)

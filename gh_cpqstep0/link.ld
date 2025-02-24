@@ -1,10 +1,18 @@
 ENTRY(_reset);
 MEMORY {
 /*flash(rx)  : ORIGIN = 0x08000000, LENGTH = 2048k*/
-  flash(rx)  : ORIGIN = 0x08000000, LENGTH = 256k /*401ccu6*/
+  flash(rx)  : ORIGIN = 0x08000000, LENGTH = 2048k /*401ccu6 256k*/
 /*sram(rwx) : ORIGIN = 0x20000000, LENGTH = 192k   remaining 64k in a separate address space */
-  sram(rwx) : ORIGIN = 0x20000000, LENGTH = 64k  /*401ccu6*/
+  sram(rwx) : ORIGIN = 0x20020000, LENGTH = 384k  /*401ccu6 0x2000_0000 64k*/
 }
+/*767
+ * MEMORY
+{
+ ram (rwx) : ORIGIN = 0x20020000, LENGTH = 384K
+ rom (rx) : ORIGIN = 0x08000000, LENGTH = 2048K
+ ccm (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+}
+ * */
 _estack     = ORIGIN(sram) + LENGTH(sram);    /* stack points to end of SRAM */
 
 SECTIONS {
