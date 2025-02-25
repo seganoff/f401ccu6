@@ -51,3 +51,9 @@ ds11532Rev8
 dtcm  128k 0x2000_0000 0x2001_ffff
 sram1 368k 0x2002_0000 0x2007_bfff
 sram2 16k  0x2007_c000 0x2007_ffff
+
+5.3.14rm rcc_apb2enr, bit 14 syscfgen: system config controller clock enabled|disabled
+"also we must clock it via /\" 5.2rm, shortly before 5.2.1
+The RCC feeds the external clock of the Cortex System Timer (SysTick) with the AHB clock
+(HCLK) divided by 8. The SysTick can work either with this clock or with the Cortex clock
+(HCLK), configurable in the SysTick control and status register.
