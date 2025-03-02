@@ -60,4 +60,23 @@ The RCC feeds the external clock of the Cortex System Timer (SysTick) with the A
 
 step2 evry 1ms s_ticks++ into: 10µs, lower to 1 µs (16 cycles systickHandler interrupt)
 blinking fails cuz time_expired + superloop (never) gets completly executed
-skipping step3 uart.
+
+some uart & comprehending the MESS st does with their cmsis files (but arm dictates the dir structure)
+cpq includes #include "stm32f429xx.h" in step5, y not the header above, stm32f4xx.h?
+apb2
+4001'1400 usart6 4001'1000 usart1
+apb1 
+4000'7c00 uart8 4000'7800 uart7 4000'5000 uart5 4000'4c00 uart4
+4000'4800 usart3 4000'4400 usart2
+
+- cmsis5 describe arm core
+Device/_Template_Vendor/ReadMe.txt dir structure for st to follow, ok
+
+- pinche stm cmsis_device_f7 mcu periferals
+arm/startup_stm32f767xx.s mdk-arm toolchain 
+gcc/startup_stm32f767xx.s gcc-based toolchain
+Include/system_stm32f7xx.h ifdefs include mcu specific e.g Include/stm32f767xx.h (regs defs, 18948 lines)
+system_stm32f7xx.c #include "stm32f7xx.h" 
+void SystemInit(void) call is made inside "startup_stm32f7xx.s" (there is no such file)
+again some hot BS from st, actually they mean mcu specific(& toolchain dependant) gcc/startup_stm32f767xx.s
+
