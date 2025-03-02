@@ -57,3 +57,7 @@ sram2 16k  0x2007_c000 0x2007_ffff
 The RCC feeds the external clock of the Cortex System Timer (SysTick) with the AHB clock
 (HCLK) divided by 8. The SysTick can work either with this clock or with the Cortex clock
 (HCLK), configurable in the SysTick control and status register.
+
+step2 evry 1ms s_ticks++ into: 10µs, lower to 1 µs (16 cycles systickHandler interrupt)
+blinking fails cuz time_expired + superloop (never) gets completly executed
+skipping step3 uart.

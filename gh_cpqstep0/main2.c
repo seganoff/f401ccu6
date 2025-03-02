@@ -22,7 +22,7 @@ struct rcc {
 #define RCC ((struct rcc *) 0x40023800)
 
 static inline void systick_init(uint32_t ticks) {
-  if ((ticks - 1) > 0xffffff) return;  // Systick timer is 24 bit
+  if ((ticks - 1) > 0x00ffffff) return;  // Systick timer is 24 bit
   SYSTICK->LOAD = ticks - 1;
   SYSTICK->VAL = 0;
   SYSTICK->CTRL = BIT(0) | BIT(1) | BIT(2);  // Enable systick
@@ -70,10 +70,10 @@ bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
 int main(void) {
   uint16_t led = PIN('B', 7);            // Blue LED
   RCC->AHB1ENR |= BIT(PINBANK(led));     // Enable GPIO clock for LED
-  systick_init(16000000 / 1000);         // Tick every 1 ms
+  systick_init(16000000 / 100000);         // Tick every 10 µs \u00b5
   gpio_set_mode(led, GPIO_MODE_OUTPUT);  // Set blue LED to output mode
-  uint32_t timer = 0, period = 500;      // Declare timer and 500ms period
-  for (;;) {
+  uint32_t timer = 0, period = 50000;      // Declare timer and 500'000 µs period
+while(1){  //for (;;) {
     if (timer_expired(&timer, period, s_ticks)) {
       static bool on;       // This block is executed
       gpio_write(led, on);  // Every `period` milliseconds
@@ -96,11 +96,8 @@ __attribute__((naked, noreturn)) void _reset(void) {
   for (;;) (void) 0;  // Infinite loop
 }
 
-extern void _estack(void);  // Defined in link.ld
+extern void _estack(void);  //Defined in link.ld
 
-// 16 standard and NN STM32-specific handlers
-// 52 401cc
-// 91 429zi
-// 110 767zi
+//16cortex gneral and NN STM-specific handlers //52 401cc //91 429zi //110 767zi
 __attribute__((section(".vectors"))) void (*const tab[16 + 110])(void) = {
     _estack, _reset, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SysTick_Handler};
