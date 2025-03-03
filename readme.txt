@@ -80,3 +80,9 @@ system_stm32f7xx.c #include "stm32f7xx.h"
 void SystemInit(void) call is made inside "startup_stm32f7xx.s" (there is no such file)
 again some hot BS from st, actually they mean mcu specific(& toolchain dependant) gcc/startup_stm32f767xx.s
 
+
+clone arm...cmsis5 > cd DEVICE clone gh...STM.../cmsis-device-f7 STM32F7
+stm32-without-cubeide-part-2-cmsis-make-and-clock-configuration (kleinembedd...)
+, but cpq cloned in root folder, not in arm's cmsis5 DEVICE folder
+
+seems its time to include arm docs, to find tha answer y there are so many folderstructures(& possible duplicates) in cube+hal driver+cmsis-device
