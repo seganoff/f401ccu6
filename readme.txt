@@ -124,3 +124,35 @@ typedef struct
   __IO uint32_t TDR;    /*!< USART Transmit Data register,             Address offset: 0x28 */
 } USART_TypeDef;
 nah, aint gonna use uart
+
+------- step 6 -----------
+3.3.2rm Read access latency
+"- When VOS[1:0] = '0x11, the maximum value of fHCLK is 180 MHz. It can be extended to
+216 MHz by activating the over-drive mode."
+Table7 7WS(8 cpu cycles) 210 < HCLK ≤ 216
+FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);
+> for f429 its rm0090Rev21 3.5.1 Table12 HCKL in MHz: Highes Voltage Range 
+(highest possible) 5WS  150<HCLK<=180 ;;; same note bout overdrive mode for 180MHz
+max values for apb1 clock & apb2 clock
+5.3.3rm RCC_CFGR bits 15:13 PPRE2 APB2 not to exceed 90MHz,Bits 12:10 PPRE1 APB1 not to excedd 45MHz
+PLL Values, "Here we chose the values manually." lyka how?
+5.2.3rm PLL
+Since the main-PLL configuration parameters cannot be changed once PLL is enabled, it is
+recommended to configure PLL before enabling it (selection of the HSI or HSE oscillator as
+PLL clock source, and configuration of division factors M, N, P, and Q). not mentioning R here?
+5.3.2rm RCC PLL configuration register (RCC_PLLCFGR) pll clockout according to formulas: 4
+f vco_clock = f pll_clock_input  * N / M
+f pll_gen_out = f vco / P ; pll general output, hot BS, imo its pllclk
+!!!dont use those formulas!!! two times hot BS
+> Bits description provide better
+
+Comparing with with Figure 13. & text 5.2.3 & Bits description PLLCFGR
+f VCO = 1/M * ( HSI || HSE ) * N ; PLLCLK = f VCO / P
+RCC_PLLCFGR  otg>=48MHz & sdmmc+rng <=48MHz ; PLLM: to limit pll jitter recommanded to select 2MHz
+2 <= PLLR <= 7 | 2 ≤ PLLQ ≤ 15 | PLLP = 2, 4, 6, or 8 | 50 ≤ PLLN ≤ 432 | 2 ≤ PLLM ≤ 63
+               |pll48clk       |   <=216MHz          |100<=VCOout<=432MHz|VCOin between [1..2]MHz
+
+0. chose HSI||HSE this gonna be input f, from this chose M: same as input(VCOin 1) or input/2 (VCOin 2)
+1. pick N, VCOin * N = VCOout
+2. pick P, pllclk = VCOout / P
+3. pick Q, pll48  = VCOout / Q
