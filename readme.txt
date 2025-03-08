@@ -32,7 +32,7 @@ Project.SetDevice ("STM32F767ZI");Project.SetHostIF ("USB", "778754800");
 Project.SetTargetIF ("SWD");Project.SetTIFSpeed ("4 MHz");
 Project.SetOSPlugin("FreeRTOSPlugin_CM7");//
 
-happy debug. // try converting bluepill st-link into jlink
+happy debug. // try converting bluepill st-link into jlink, < failed
 ozone level 0 jlink flashes .elf's fine(download to target). refuses to flash .bin though.
 
 $ find /opt -name 'STM32F767.svd'
@@ -85,4 +85,42 @@ clone arm...cmsis5 > cd DEVICE clone gh...STM.../cmsis-device-f7 STM32F7
 stm32-without-cubeide-part-2-cmsis-make-and-clock-configuration (kleinembedd...)
 , but cpq cloned in root folder, not in arm's cmsis5 DEVICE folder
 
-seems its time to include arm docs, to find tha answer y there are so many folderstructures(& possible duplicates) in cube+hal driver+cmsis-device
+seems its time to include arm docs, to find tha answer y there are so many folderstructures(& possible duplicates) 
+in cube+hal driver+cmsis-device
+
+in CMSIS_5 folder $ git checkout -b 540 5.4.0
+ls -s <cloned cmsis core> cmsis_core
+ls -s <cloned cmsisDeviceF7> cmsis_f7
+pay attention with branches/tags, 
+It is crucial that you use a consistent set of versions for the CMSIS Core - CMSIS Device, 
+as mentioned in this release note. this > CMSIS V5.4_CM7, again some hot BS from stm, what they mean is:
+STM32CubeF7/tree/master/Drivers/CMSIS#cmsis-version-5: 5.4.0
+
+cmsis_device_fX inconsistency, uart init, in hal.h, thanks for ref to datasheet
+f429xx.h
+typedef struct
+{
+  __IO uint32_t SR;         /*!< USART Status register,                   Address offset: 0x00 */
+  __IO uint32_t DR;         /*!< USART Data register,                     Address offset: 0x04 */
+  __IO uint32_t BRR;        /*!< USART Baud rate register,                Address offset: 0x08 */
+  __IO uint32_t CR1;        /*!< USART Control register 1,                Address offset: 0x0C */
+  __IO uint32_t CR2;        /*!< USART Control register 2,                Address offset: 0x10 */
+  __IO uint32_t CR3;        /*!< USART Control register 3,                Address offset: 0x14 */
+  __IO uint32_t GTPR;       /*!< USART Guard time and prescaler register, Address offset: 0x18 */
+} USART_TypeDef;
+f767xx.h
+typedef struct
+{
+  __IO uint32_t CR1;    /*!< USART Control register 1,                 Address offset: 0x00 */
+  __IO uint32_t CR2;    /*!< USART Control register 2,                 Address offset: 0x04 */
+  __IO uint32_t CR3;    /*!< USART Control register 3,                 Address offset: 0x08 */
+  __IO uint32_t BRR;    /*!< USART Baud rate register,                 Address offset: 0x0C */
+  __IO uint32_t GTPR;   /*!< USART Guard time and prescaler register,  Address offset: 0x10 */
+  __IO uint32_t RTOR;   /*!< USART Receiver Time Out register,         Address offset: 0x14 */
+  __IO uint32_t RQR;    /*!< USART Request register,                   Address offset: 0x18 */
+  __IO uint32_t ISR;    /*!< USART Interrupt and status register,      Address offset: 0x1C */
+  __IO uint32_t ICR;    /*!< USART Interrupt flag Clear register,      Address offset: 0x20 */
+  __IO uint32_t RDR;    /*!< USART Receive Data register,              Address offset: 0x24 */
+  __IO uint32_t TDR;    /*!< USART Transmit Data register,             Address offset: 0x28 */
+} USART_TypeDef;
+nah, aint gonna use uart

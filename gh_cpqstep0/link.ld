@@ -1,4 +1,4 @@
-ENTRY(_reset);
+ENTRY(Reset_Handler);
 MEMORY {
 /*flash(rx)  : ORIGIN = 0x08000000, LENGTH = 2048k*/
   flash(rx)  : ORIGIN = 0x08000000, LENGTH = 2048k /*401ccu6 256k*/
@@ -7,16 +7,18 @@ MEMORY {
 }
 /*767
  * MEMORY
+  ENTRY(_reset); now gcc/starup<model>.s
+& .vectors > .isr_vector
 {
  ram (rwx) : ORIGIN = 0x20020000, LENGTH = 384K
  rom (rx) : ORIGIN = 0x08000000, LENGTH = 2048K
  ccm (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
 }
- * */
+*/
 _estack     = ORIGIN(sram) + LENGTH(sram);    /* stack points to end of SRAM */
 
 SECTIONS {
-  .vectors  : { KEEP(*(.vectors)) }   > flash
+  .vectors  : { KEEP(*(.isr_vector)) }   > flash
   .text     : { *(.text*) }           > flash
   .rodata   : { *(.rodata*) }         > flash
 
