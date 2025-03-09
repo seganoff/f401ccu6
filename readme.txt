@@ -125,17 +125,35 @@ typedef struct
 } USART_TypeDef;
 nah, aint gonna use uart
 
+lib/stm32/f4/rcc.c libopencm3 for blackpill wif 25MHz HSE
+const struct rcc_clock_scale rcc_hse_25mhz_3v3[RCC_CLOCK_3V3_END] = {
+	{ /* 84MHz */
+		.pllm = 25,
+		.plln = 336,
+		.pllp = 4,
+		.pllq = 7,
+		.pllr = 0,
+		.pll_source = RCC_CFGR_PLLSRC_HSE_CLK,
+		.hpre = RCC_CFGR_HPRE_NODIV,
+		.ppre1 = RCC_CFGR_PPRE_DIV2,
+		.ppre2 = RCC_CFGR_PPRE_NODIV,
+		.voltage_scale = PWR_SCALE1,
+		.flash_config = FLASH_ACR_DCEN | FLASH_ACR_ICEN |
+				FLASH_ACR_LATENCY_2WS,
+		.ahb_frequency  = 84000000,
+		.apb1_frequency = 42000000,
+		.apb2_frequency = 84000000,
 ------- step 6 -----------
 3.3.2rm Read access latency
 "- When VOS[1:0] = '0x11, the maximum value of fHCLK is 180 MHz. It can be extended to
 216 MHz by activating the over-drive mode."
 Table7 7WS(8 cpu cycles) 210 < HCLK ≤ 216
-FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);
+FLASH->ACR |= FLASH_LATENCY | BIT(8) prefetch enable  | BIT(9) art enable ;
 > for f429 its rm0090Rev21 3.5.1 Table12 HCKL in MHz: Highes Voltage Range 
 (highest possible) 5WS  150<HCLK<=180 ;;; same note bout overdrive mode for 180MHz
 max values for apb1 clock & apb2 clock
-5.3.3rm RCC_CFGR bits 15:13 PPRE2 APB2 not to exceed 90MHz,Bits 12:10 PPRE1 APB1 not to excedd 45MHz
-PLL Values, "Here we chose the values manually." lyka how?
+5.3.3rm RCC_CFGR bits 15:13 PPRE2 APB2 not to exceed 90MHz,Bits 12:10 PPRE1 APB1 not to exceed 45MHz
+PLL Values, "Here we chose the values manually." lyka how? > RCC_PLLCFGR
 5.2.3rm PLL
 Since the main-PLL configuration parameters cannot be changed once PLL is enabled, it is
 recommended to configure PLL before enabling it (selection of the HSI or HSE oscillator as
@@ -151,8 +169,17 @@ f VCO = 1/M * ( HSI || HSE ) * N ; PLLCLK = f VCO / P
 RCC_PLLCFGR  otg>=48MHz & sdmmc+rng <=48MHz ; PLLM: to limit pll jitter recommanded to select 2MHz
 2 <= PLLR <= 7 | 2 ≤ PLLQ ≤ 15 | PLLP = 2, 4, 6, or 8 | 50 ≤ PLLN ≤ 432 | 2 ≤ PLLM ≤ 63
                |pll48clk       |   <=216MHz          |100<=VCOout<=432MHz|VCOin between [1..2]MHz
-
+RCC_PLLCFGR
 0. chose HSI||HSE this gonna be input f, from this chose M: same as input(VCOin 1) or input/2 (VCOin 2)
 1. pick N, VCOin * N = VCOout
 2. pick P, pllclk = VCOout / P
 3. pick Q, pll48  = VCOout / Q
+oscillator in = 8MHz > M:4 VCOin=2MHz N:216 fVCO=432MHz P:2 VCOout=216MHz Q:9 fVCO/48MHz R:2 > plldsi=216MHz
+7wait cycles; ppre2 apb2 <=90MHz ppre1 apb1<=45MHz
+from cube clock config: sysclk 216 ahp_prescaler:1 hclk:216(max) 
+apb1/4 > pclk1 54(max) apb2/2 > pclk2 108(max) >   ???<=90 & <=45 ???
+5.2.1rm HSE bypass, RCC_CR HSEBYP 18 & HSEON 16 bits 5.2.3rm RCC_PLLCFGR _CFGR 5.2.7rm nmi exception
+
+
+
+
