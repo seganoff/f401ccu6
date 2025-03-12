@@ -177,9 +177,17 @@ RCC_PLLCFGR
 oscillator in = 8MHz > M:4 VCOin=2MHz N:216 fVCO=432MHz P:2 VCOout=216MHz Q:9 fVCO/48MHz R:2 > plldsi=216MHz
 7wait cycles; ppre2 apb2 <=90MHz ppre1 apb1<=45MHz
 from cube clock config: sysclk 216 ahp_prescaler:1 hclk:216(max) 
-apb1/4 > pclk1 54(max) apb2/2 > pclk2 108(max) >   ???<=90 & <=45 ???
+apb1/4 > pclk1 54(max) apb2/2 > pclk2 108(max) cubeMX  >   ???<=90 & <=45 ???
 5.2.1rm HSE bypass, RCC_CR HSEBYP 18 & HSEON 16 bits 5.2.3rm RCC_PLLCFGR _CFGR 5.2.7rm nmi exception
 
+3.15 Clocks & startup ds11532rev8
+'The maximum frequency of the two AHB
+buses is 216 MHz while the maximum frequency of the high-speed APB domains is
+108 MHz. The maximum allowed frequency of the low-speed APB domain is 54 MHz.'
+There is an error in reference manual, maybe from yyp, ⚡ apb1 apb2 max frequency.
 
-
-
+routine/alg to setup RCC &whatnots to max frequency
+blog.embeddedexpert.io/?p=531
+STM32CubeF7/blob/master/Projects/STM32F767ZI-Nucleo/Examples_LL/RCC/RCC_UseHSI_PLLasSystemClock/Src/main.c:489-539
+libopencm3/blob/master/lib/stm32/f7/rcc.c:376-435
+libopencm3/blob/master/lib/stm32/f4/rcc.c:789-860
