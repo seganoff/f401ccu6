@@ -89,8 +89,8 @@ seems its time to include arm docs, to find tha answer y there are so many folde
 in cube+hal driver+cmsis-device
 
 in CMSIS_5 folder $ git checkout -b 540 5.4.0
-ls -s <cloned cmsis core> cmsis_core
-ls -s <cloned cmsisDeviceF7> cmsis_f7
+$ ln -s <cloned cmsis core> cmsis_core
+$ ln -s <cloned cmsisDeviceF7> cmsis_f7
 pay attention with branches/tags, 
 It is crucial that you use a consistent set of versions for the CMSIS Core - CMSIS Device, 
 as mentioned in this release note. this > CMSIS V5.4_CM7, again some hot BS from stm, what they mean is:
