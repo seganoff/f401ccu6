@@ -191,3 +191,12 @@ blog.embeddedexpert.io/?p=531
 STM32CubeF7/blob/master/Projects/STM32F767ZI-Nucleo/Examples_LL/RCC/RCC_UseHSI_PLLasSystemClock/Src/main.c:489-539
 libopencm3/blob/master/lib/stm32/f7/rcc.c:376-435
 libopencm3/blob/master/lib/stm32/f4/rcc.c:789-860
+examples_ll seem to be mediocre,regard as well "HAL" Examples
+STM32CubeF7/blob/master/Projects/STM32F767ZI-Nucleo/Examples/RCC/RCC_ClockConfig/readme.txt
+kindof HAL vs LL issue, stay away from HAL, thats the main point.
+
+    includes start: "hal.h":1
+cmsis_f7/Include/stm32f767xx.h:2+1 ./system_stm32f7xx.h:0 & (arm)cmsis_core/CMSIS/Core/Include/core_cm7.h:
+arm 2x _VIRTUAL_HEADER_FILE #ifdef _VIRTUAL construct &
+cmsis_version.h:0 cmsis_compiler.h:#ifdefs additional headers ;  mpu_armv7.h:0
+

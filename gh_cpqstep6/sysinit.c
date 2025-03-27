@@ -1,8 +1,10 @@
 #include "hal.h"
 
 uint32_t SystemCoreClock = SYS_FREQUENCY;
-
-void SystemInit(void) {  // Called automatically by startup code
+//hal.h > stm32f767xx.h > system_stm32f7xx.h: system_exported_functions\/
+//extern void SystemInit(void);extern void SystemCoreClockUpdate(void);
+//Called from cmsis_f7/Source/Templates/gcc/startup_stm32f767xx.s:61 bl SystemInit
+void cpqHSI(void) {
   SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
   FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, prefetch
   RCC->PLLCFGR &= ~((BIT(17) - 1));                   // Clear PLL multipliers
@@ -13,7 +15,23 @@ void SystemInit(void) {  // Called automatically by startup code
   RCC->CFGR = (APB1_PRE << 10) | (APB2_PRE << 13);    // Set prescalers
   RCC->CFGR |= 2;                                     // Set clock source to PLL
   while ((RCC->CFGR & 12) == 0) spin(1);              // Wait until done
-
   RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG
   SysTick_Config(SystemCoreClock / 1000);  // Sys tick every 1ms
 }
+
+void locm(void){
+//(arm)systemControlBlock->coprocessorAccessControlRegister
+SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));
+FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      
+}
+//Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_system.h:891:
+//__STATIC_INLINE void LL_FLASH_SetLatency(uint32_t Latency)
+void cubeExample(void){
+}
+
+void SystemInit(void){
+cpqHSI();
+//locm();
+//cubeExample();
+}
+
