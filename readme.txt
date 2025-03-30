@@ -189,6 +189,8 @@ There is an error in reference manual, maybe from yyp, ⚡ apb1 apb2 max frequen
 routine/alg to setup RCC &whatnots to max frequency
 blog.embeddedexpert.io/?p=531
 STM32CubeF7/blob/master/Projects/STM32F767ZI-Nucleo/Examples_LL/RCC/RCC_UseHSI_PLLasSystemClock/Src/main.c:489-539
+STM32CubeF7/blob/master/Projects/STM32F767ZI-Nucleo/Examples_LL/RCC/RCC_UseHSEasSystemClock/Src/main.c
+STM32CubeF7/blob/master/Projects/STM32F767ZI-Nucleo/Templates_LL/Src/main.c
 libopencm3/blob/master/lib/stm32/f7/rcc.c:376-435
 libopencm3/blob/master/lib/stm32/f4/rcc.c:789-860
 examples_ll seem to be mediocre,regard as well "HAL" Examples

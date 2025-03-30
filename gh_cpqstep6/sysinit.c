@@ -19,15 +19,102 @@ void cpqHSI(void) {
   SysTick_Config(SystemCoreClock / 1000);  // Sys tick every 1ms
 }
 
-void locm(void){
 //(arm)systemControlBlock->coprocessorAccessControlRegister
-SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));
-FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      
-}
+//SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));
+//FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      
+
+//void rcc_clock_setup_hse(const struct rcc_clock_scale *clock, uint32_t hse_mhz)
+void locm(void){
+uint8_t pllm = hse_mhz;
+/* Enable internal high-speed oscillator.
+rcc_osc_on(RCC_HSI);rcc_wait_for_osc_ready(RCC_HSI);*/
+/* Select HSI as SYSCLK source. rcc_set_sysclk_source(RCC_CFGR_SW_HSI);*/
+/* Enable external high-speed oscillator.
+rcc_osc_on(RCC_HSE);
+rcc_wait_for_osc_ready(RCC_HSE);rcc_periph_clock_enable(RCC_PWR);
+pwr_set_vos_scale(clock->vos_scale);
+if (clock->overdrive) pwr_enable_overdrive();
+*/
+/*Set prescalers for AHB, ADC, APB1, APB2.
+* Do this before touching the PLL (TODO: why?)
+rcc_set_hpre(clock->hpre);
+rcc_set_ppre1(clock->ppre1);
+rcc_set_ppre2(clock->ppre2);*/
+/* Disable PLL oscillator before changing its configuration.
+rcc_osc_off(RCC_PLL);*/
+/* Configure the PLL oscillator.
+rcc_set_main_pll_hse(pllm, clock->plln, clock->pllp, clock->pllq);*/
+/* Enable PLL oscillator and wait for it to stabilize.
+rcc_osc_on(RCC_PLL);rcc_wait_for_osc_ready(RCC_PLL);*/
+/* Configure flash settings.
+flash_set_ws(clock->flash_waitstates);
+flash_art_enable();
+flash_prefetch_enable();*/
+/* Select PLL as SYSCLK source. rcc_set_sysclk_source(RCC_CFGR_SW_PLL);*/
+/* Wait for PLL clock to be selected.rcc_wait_for_sysclk_status(RCC_PLL);*/
+/* Set the clock frequencies used.
+rcc_ahb_frequency = clock->ahb_frequency;
+rcc_apb1_frequency = clock->apb1_frequency;
+rcc_apb2_frequency = clock->apb2_frequency;*/
+/* Disable internal high-speed oscillator. rcc_osc_off(RCC_HSI);*/
+}//end locm
+
 //Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_system.h:891:
 //__STATIC_INLINE void LL_FLASH_SetLatency(uint32_t Latency)
 void cubeExample(void){
-}
+
+void SystemClock_Config(void)
+{
+  /* Enable HSE clock */
+  LL_RCC_HSE_EnableBypass();
+  LL_RCC_HSE_Enable();
+  while(LL_RCC_HSE_IsReady() != 1)
+  {
+  };
+
+  /* Set FLASH latency */
+  LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);
+
+  /* Enable PWR clock */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+
+  /* Activation OverDrive Mode */
+  LL_PWR_EnableOverDriveMode();
+  while(LL_PWR_IsActiveFlag_OD() != 1)
+  {
+  };
+
+  /* Activation OverDrive Switching */
+  LL_PWR_EnableOverDriveSwitching();
+  while(LL_PWR_IsActiveFlag_ODSW() != 1)
+  {
+  };
+
+  /* Main PLL configuration and activation */
+  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_8, 432, LL_RCC_PLLP_DIV_2);
+  LL_RCC_PLL_Enable();
+  while(LL_RCC_PLL_IsReady() != 1)
+  {
+  };
+
+  /* Sysclk activation on the main PLL */
+  LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+  {
+  };
+
+  /* Set APB1 & APB2 prescaler */
+  LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_4);
+  LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_2);
+
+  /* Set systick to 1ms */
+  SysTick_Config(216000000 / 1000);
+
+  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
+  SystemCoreClock = 216000000;
+
+}//cubeend
 
 void SystemInit(void){
 cpqHSI();
