@@ -19,6 +19,8 @@ void cpqHSI(void) {
   SysTick_Config(SystemCoreClock / 1000);  // Sys tick every 1ms
 }
 
+
+
 //(arm)systemControlBlock->coprocessorAccessControlRegister
 //SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));
 //FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      
@@ -61,23 +63,17 @@ rcc_apb2_frequency = clock->apb2_frequency;*/
 
 //Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_system.h:891:
 //__STATIC_INLINE void LL_FLASH_SetLatency(uint32_t Latency)
-void cubeExample(void){
 
-void SystemClock_Config(void)
-{
-  /* Enable HSE clock */
-  LL_RCC_HSE_EnableBypass();
-  LL_RCC_HSE_Enable();
-  while(LL_RCC_HSE_IsReady() != 1)
-  {
-  };
+void ll_tempate(void){ //Templates_LL/Src/main.c
 
-  /* Set FLASH latency */
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);
+//core_cm7.h:2229 static_inline voids
+SCB_EnableICache(); SCB_EnableDCache();
+// Set FLASH latency LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);
+SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
+FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, prefetch
 
-  /* Enable PWR clock */
-  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
-
+// Enable PWR clock LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR); RCC_APB1ENR_PWREN
+RCC->APB1ENR = RCC_APB1ENR_PWREN;
   /* Activation OverDrive Mode */
   LL_PWR_EnableOverDriveMode();
   while(LL_PWR_IsActiveFlag_OD() != 1)
@@ -89,36 +85,36 @@ void SystemClock_Config(void)
   while(LL_PWR_IsActiveFlag_ODSW() != 1)
   {
   };
-
+  
   /* Main PLL configuration and activation */
-  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_8, 432, LL_RCC_PLLP_DIV_2);
+  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI, LL_RCC_PLLM_DIV_16, 432, LL_RCC_PLLP_DIV_2);
   LL_RCC_PLL_Enable();
-  while(LL_RCC_PLL_IsReady() != 1)
+  while(LL_RCC_PLL_IsReady() != 1) 
   {
   };
-
+  
   /* Sysclk activation on the main PLL */
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) 
   {
   };
-
-  /* Set APB1 & APB2 prescaler */
+  
+  /* Set APB1 & APB2 prescaler*/
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_4);
   LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_2);
-
+  
   /* Set systick to 1ms */
   SysTick_Config(216000000 / 1000);
-
+  
   /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
-  SystemCoreClock = 216000000;
+  SystemCoreClock = 216000000; 
 
-}//cubeend
+}//template
 
 void SystemInit(void){
 cpqHSI();
 //locm();
-//cubeExample();
+//ll_template();
 }
 
