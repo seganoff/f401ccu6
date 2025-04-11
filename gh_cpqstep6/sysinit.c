@@ -74,17 +74,11 @@ FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, prefetch
 
 // Enable PWR clock LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR); RCC_APB1ENR_PWREN
 RCC->APB1ENR = RCC_APB1ENR_PWREN;
-  /* Activation OverDrive Mode */
-  LL_PWR_EnableOverDriveMode();
-  while(LL_PWR_IsActiveFlag_OD() != 1)
-  {
-  };
-
-  /* Activation OverDrive Switching */
-  LL_PWR_EnableOverDriveSwitching();
-  while(LL_PWR_IsActiveFlag_ODSW() != 1)
-  {
-  };
+// Activation OverDrive Mode LL_PWR_EnableOverDriveMode(); SET_BIT(PWR->CR1, PWR_CR1_ODEN);
+//while(LL_PWR_IsActiveFlag_OD() != 1){}; READ_BIT(PWR->CSR1, PWR_CSR1_ODRDY) == (PWR_CSR1_ODRDY));
+// Activation OverDrive Switching LL_PWR_EnableOverDriveSwitching(); SET_BIT(PWR->CR1, PWR_CR1_ODSWEN);
+//while(LL_PWR_IsActiveFlag_ODSW() != 1){};
+//need dig deeper about overdriveMode & scale modes & if still needed when pll as sysck
   
   /* Main PLL configuration and activation */
   LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI, LL_RCC_PLLM_DIV_16, 432, LL_RCC_PLLP_DIV_2);
