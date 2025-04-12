@@ -1,3 +1,5 @@
 *.swp
+*.bin
+*.elf*
 cmsis_core
 cmsis_f7

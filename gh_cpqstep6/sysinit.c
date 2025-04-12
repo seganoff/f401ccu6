@@ -27,7 +27,7 @@ void cpqHSI(void) {
 
 //void rcc_clock_setup_hse(const struct rcc_clock_scale *clock, uint32_t hse_mhz)
 void locm(void){
-uint8_t pllm = hse_mhz;
+//uint8_t pllm = hse_mhz;
 /* Enable internal high-speed oscillator.
 rcc_osc_on(RCC_HSI);rcc_wait_for_osc_ready(RCC_HSI);*/
 /* Select HSI as SYSCLK source. rcc_set_sysclk_source(RCC_CFGR_SW_HSI);*/
@@ -81,34 +81,68 @@ RCC->APB1ENR = RCC_APB1ENR_PWREN;
 //need dig deeper about overdriveMode & scale modes & if still needed when pll as sysck
   
   /* Main PLL configuration and activation */
-  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI, LL_RCC_PLLM_DIV_16, 432, LL_RCC_PLLP_DIV_2);
-  LL_RCC_PLL_Enable();
-  while(LL_RCC_PLL_IsReady() != 1) 
-  {
-  };
-  
+  //LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI, LL_RCC_PLLM_DIV_16, 432, LL_RCC_PLLP_DIV_2);
+  //LL_RCC_PLL_Enable();
+  //while(LL_RCC_PLL_IsReady() != 1) {};
   /* Sysclk activation on the main PLL */
-  LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) 
-  {
-  };
-  
+  //LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+  //LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+  //while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL){};
   /* Set APB1 & APB2 prescaler*/
-  LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_4);
-  LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_2);
-  
+  //LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_4);LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_2);
   /* Set systick to 1ms */
   SysTick_Config(216000000 / 1000);
-  
   /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
   SystemCoreClock = 216000000; 
-
 }//template
 
+//blog.embeddedexpert.io/?p=531
+void p531(void)//void SysClockConfig(void) //set the core frequency to 216MHz
+{
+//#define PLL_M      4
+//#define PLL_N      216
+//#define PLL_P      2
+__IO uint32_t StartUpCounter = 0, HSEStatus = 0;
+RCC->CR |= RCC_CR_CSSON;
+RCC->CR |= RCC_CR_HSEBYP;
+RCC->CR |= ((uint32_t)RCC_CR_HSEON);
+do{HSEStatus = RCC->CR & RCC_CR_HSERDY;StartUpCounter++;} 
+while((HSEStatus == 0) && (StartUpCounter != 3000));
+if ((RCC->CR & RCC_CR_HSERDY) != 0/*RESET*/) HSEStatus = (uint32_t)0x01;
+else HSEStatus = (uint32_t)0x00;
+
+if (HSEStatus == (uint32_t)0x01){
+RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+PWR->CR1 &= (uint32_t)~(PWR_CR1_VOS);
+RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
+RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
+RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
+RCC->PLLCFGR = PLL_M | (PLL_N << RCC_PLLCFGR_PLLN_Pos) | (((PLL_P >> 1) -1) << RCC_PLLCFGR_PLLP_Pos) |
+           (RCC_PLLCFGR_PLLSRC_HSE);
+RCC->CR |= RCC_CR_PLLON;
+while((RCC->CR & RCC_CR_PLLRDY) == 0){}
+/* Configure Flash prefetch, Instruction cache, Data cache and wait state */
+FLASH->ACR = FLASH_ACR_LATENCY_7WS;
+/* Select the main PLL as system clock source */
+RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+RCC->CFGR |= RCC_CFGR_SW_PLL;
+/* Wait till the main PLL is used as system clock source */
+while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL)
+{;}
+}//status 0x1
+else
+{ /* If HSE fails to start-up, the application will have wrong clock
+  configuration. User can add here some code to deal with this error */
+}
+RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG
+SysTick_Config(SystemCoreClock / 1000);  // Sys tick every 1ms
+//SystemCoreClockUpdate();
+}//p531
+
 void SystemInit(void){
-cpqHSI();
+//cpqHSI();
 //locm();
 //ll_template();
+p531();
 }
 

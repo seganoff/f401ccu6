@@ -20,7 +20,7 @@
 //enum { APB1_PRE = 5 /* AHB clock / 4 */, APB2_PRE = 4 /* AHB clock / 2 */ };
 //enum { PLL_HSI = 16, PLL_M = 8, PLL_N = 180, PLL_P = 2 };  // Run at 180 Mhz
 enum { APB1_PRE = 4 /* AHB clock / 4 */, APB2_PRE = 2 /* AHB clock / 2 */ };
-enum { OSC_IN = 16, PLL_M = 8, PLL_N = 216, PLL_P = 2 };
+enum { OSC_IN = 8, PLL_M = 4, PLL_N = 216, PLL_P = 2 };
 #define FLASH_LATENCY 7
 #define SYS_FREQUENCY ((OSC_IN * PLL_N / PLL_M / PLL_P) * 1000000)
 #define APB2_FREQUENCY (SYS_FREQUENCY / (BIT(APB2_PRE - 3)))
