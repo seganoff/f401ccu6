@@ -202,3 +202,21 @@ cmsis_f7/Include/stm32f767xx.h:2+1 ./system_stm32f7xx.h:0 & (arm)cmsis_core/CMSI
 arm 2x _VIRTUAL_HEADER_FILE #ifdef _VIRTUAL construct &
 cmsis_version.h:0 cmsis_compiler.h:#ifdefs additional headers ;  mpu_armv7.h:0
 
+------- step 7 ----------- reuse step6 folder
+
+mongoose.c/.h + _custom.h(defines) net.c packed_fs.c first look seems not beeing HW dependant, 
+so just cp <srcDir>/{mongoose*,packed*,net.c} ./
+
+startup.c again? any reason to not use mcu specific one?
+'Source/Templates/gcc/startup_stm32f767xx.s' vector table already matches with mcu
+"The ST CMSIS package also provides startup files for all their MCUs. We can use those instead of hand-writing the startup.c.
+The ST-provided startup file calls SystemInit() function, so we define it in the main.c." (cpq step5)
+y degrade back to handwritten startup.c? > explaination of weak concept, but .s file defines interruptHandler weak as well
+sysinit.c > moved into hal.h (static inline clock_init(void))
+
+main.c:27 NVIC_EnableIRQ(ETH_IRQn);  // Setup Ethernet IRQ handler
+         core_cm{4,7}.h   ETH_IRQn=61, f767xx.h   /*!< Ethernet global Interrupt*/
+mongoose.c:6171:void ETH_IRQHandler(void) {
+
+
+
