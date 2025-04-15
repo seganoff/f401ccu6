@@ -218,5 +218,8 @@ main.c:27 NVIC_EnableIRQ(ETH_IRQn);  // Setup Ethernet IRQ handler
          core_cm{4,7}.h   ETH_IRQn=61, f767xx.h   /*!< Ethernet global Interrupt*/
 mongoose.c:6171:void ETH_IRQHandler(void) {
 
+step5+6 gone, SysTick_Config(SystemCoreClock/1000) called instead
+static inline void systick_init(uint32_t ticks) handwritten
+core_cm7.h:2564:__STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks) arm provided
 
 

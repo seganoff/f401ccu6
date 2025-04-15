@@ -143,6 +143,7 @@ void SystemInit(void){
 //cpqHSI();
 //locm();
 //ll_template();
-p531();
+//p531();
+clock_init();
 }
 

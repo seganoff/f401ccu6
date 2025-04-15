@@ -26,7 +26,7 @@ enum { OSC_IN = 8, PLL_M = 4, PLL_N = 216, PLL_P = 2 };
 #define APB2_FREQUENCY (SYS_FREQUENCY / (BIT(APB2_PRE - 3)))
 #define APB1_FREQUENCY (SYS_FREQUENCY / (BIT(APB1_PRE - 3)))
 
-static inline void spin(volatile uint32_t count) {while (count--) (void) 0;}
+static inline void spin(volatile uint32_t count) {while (count--) /*(void) 0;*/asm("nop");}
 
 enum { GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG };
 enum { GPIO_OTYPE_PUSH_PULL, GPIO_OTYPE_OPEN_DRAIN };
@@ -150,4 +150,43 @@ static inline bool timer_expired(volatile uint32_t *t, uint32_t prd,
   if (*t > now) return false;                    // Not expired yet, return
   *t = (now - *t) > prd ? now + prd : *t + prd;  // Next expiration time
   return true;                                   // Expired, return true
+}
+
+static inline void clock_init(void){
+//core_cm7.h:2229 static_inline voids
+SCB_EnableICache(); SCB_EnableDCache();
+// Set FLASH latency LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);
+SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
+FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, prefetch
+
+RCC->CR |= RCC_CR_CSSON;
+RCC->CR |= RCC_CR_HSEBYP;
+RCC->CR |= ((uint32_t)RCC_CR_HSEON);
+
+//RCC->APB1ENR = RCC_APB1ENR_PWREN;
+RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+PWR->CR1 &= (uint32_t)~(PWR_CR1_VOS);//TODO voltage scale 1 as in examples
+RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
+RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
+RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
+
+RCC->PLLCFGR = 
+  PLL_M |
+ (PLL_N << RCC_PLLCFGR_PLLN_Pos) |
+ (((PLL_P >> 1) -1) << RCC_PLLCFGR_PLLP_Pos) |
+ (RCC_PLLCFGR_PLLSRC_HSE)
+;
+
+RCC->CR |= RCC_CR_PLLON;
+while((RCC->CR & RCC_CR_PLLRDY) == 0){;}
+
+RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+RCC->CFGR |= RCC_CFGR_SW_PLL;
+/* Wait till the main PLL is used as system clock source */
+while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL){;}
+
+RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG
+SysTick_Config(/*SystemCoreClock*/SYS_FREQUENCY / 1000);  // Sys tick every 1ms
+//SystemCoreClockUpdate();
+
 }

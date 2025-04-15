@@ -6,9 +6,11 @@ CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
 #-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(EXTRA_CFLAGS) # f401ccu6
 #arm-none-eabi-gcc -E -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16 -DSTM32F7
 #-DSTM32F7CCM -DSTM32F767ZIT6 -D_ROM=2048K -D_RAM=384K -D_CCM=128K -D_CCM_OFF=0x20000000 -D_ROM_OFF=0x08000000 -D_RAM_OFF=0x20020000 -P -E linker.ld.S -o f767_linker
+#TODO link.ld into f767_linker
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
 #LDFLAGS ?= -Tf767_linker -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
 SOURCES  = main6.c syscalls.c sysinit.c
+#SOURCES  = main7.c syscalls.c sysinit.c mongoose.c net.c packed_fs.c # step7
 #SOURCES += cmsis_f4/Source/Templates/gcc/startup_stm32f429xx.s
 #SOURCES += cmsis-device-f7/Source/Templates/gcc/startup_stm32f767xx.s # use links
 SOURCES += cmsis_f7/Source/Templates/gcc/startup_stm32f767xx.s
