@@ -1,6 +1,8 @@
 #pragma once
 
 #include "stm32f767xx.h"//"stm32f429xx.h"
+//um1974 6.5
+//ld1 pb0 || pa5 ; ld2 pb7 ; ld3 pb14
 
 
 #include <stdbool.h>
@@ -176,6 +178,7 @@ RCC->PLLCFGR =
  (((PLL_P >> 1) -1) << RCC_PLLCFGR_PLLP_Pos) |
  (RCC_PLLCFGR_PLLSRC_HSE)
 ;
+//TODO PLL_R
 
 RCC->CR |= RCC_CR_PLLON;
 while((RCC->CR & RCC_CR_PLLRDY) == 0){;}
