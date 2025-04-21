@@ -9,8 +9,8 @@ CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
 #TODO link.ld into f767_linker
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
 #LDFLAGS ?= -Tf767_linker -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
-SOURCES  = main6.c syscalls.c sysinit.c
-#SOURCES  = main7.c syscalls.c sysinit.c mongoose.c net.c packed_fs.c # step7
+#SOURCES  = main6.c syscalls.c sysinit.c
+SOURCES  = main7.c syscalls.c sysinit.c mongoose.c net.c packed_fs.c # step7
 #SOURCES += cmsis_f4/Source/Templates/gcc/startup_stm32f429xx.s
 #SOURCES += cmsis-device-f7/Source/Templates/gcc/startup_stm32f767xx.s # use links
 SOURCES += cmsis_f7/Source/Templates/gcc/startup_stm32f767xx.s

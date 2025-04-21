@@ -203,7 +203,6 @@ arm 2x _VIRTUAL_HEADER_FILE #ifdef _VIRTUAL construct &
 cmsis_version.h:0 cmsis_compiler.h:#ifdefs additional headers ;  mpu_armv7.h:0
 
 ------- step 7 ----------- reuse step6 folder
-
 mongoose.c/.h + _custom.h(defines) net.c packed_fs.c first look seems not beeing HW dependant, 
 so just cp <srcDir>/{mongoose*,packed*,net.c} ./
 
@@ -222,4 +221,8 @@ step5+6 gone, SysTick_Config(SystemCoreClock/1000) called instead
 static inline void systick_init(uint32_t ticks) handwritten
 core_cm7.h:2564:__STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks) arm provided
 
+check weather macroFunctions from hal.h like bit,pin,pinno,pinbank,setbits are already supplied by st/arm headers
 
+not getting ip assignt by dhcp, anyway i dont wanna dig deeper why, so step 7 compiles & runs, 
+but not tested the actual dashboard. maybe some other time
+---------- done for now---------------------

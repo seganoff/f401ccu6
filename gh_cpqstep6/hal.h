@@ -1,14 +1,19 @@
 #pragma once
 
-#include "stm32f767xx.h"//"stm32f429xx.h"
 //um1974 6.5
 //ld1 pb0 || pa5 ; ld2 pb7 ; ld3 pb14
 
+//#include <stdbool.h>
+//#include <stdint.h>
+//#include <stdio.h>
+//#include <string.h>
 
+#include <inttypes.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include "stm32f767xx.h"//"stm32f429xx.h"
 
 #define BIT(x) (1UL << (x))
 #define SETBITS(R, CLEARMASK, SETMASK) (R) = ((R) & ~(CLEARMASK)) | (SETMASK)
@@ -70,6 +75,21 @@ static inline void gpio_output(uint16_t pin) {
             GPIO_PULL_NONE, 0);
 }
 
+static inline void gpio_set_mode(uint16_t pin, uint8_t mode) {
+  GPIO_TypeDef *gpio = GPIO(PINBANK(pin));  // GPIO bank
+  int n = PINNO(pin);                      // Pin number
+  RCC->AHB1ENR |= BIT(PINBANK(pin));       // Enable GPIO clock
+  gpio->MODER &= ~(3U << (n * 2));         // Clear existing setting
+  gpio->MODER |= (mode & 3U) << (n * 2);   // Set new mode
+}
+
+static inline void gpio_set_af(uint16_t pin, uint8_t af_num) {
+  GPIO_TypeDef *gpio = GPIO(PINBANK(pin));  // GPIO bank
+  int n = PINNO(pin);                      // Pin number
+  gpio->AFR[n >> 3] &= ~(15UL << ((n & 7) * 4));
+  gpio->AFR[n >> 3] |= ((uint32_t) af_num) << ((n & 7) * 4);
+}
+/* for step6 ?
 static inline void irq_exti_attach(uint16_t pin) {
   uint8_t bank = (uint8_t) (PINBANK(pin)), n = (uint8_t) (PINNO(pin));
   SYSCFG->EXTICR[n / 4] &= ~(15UL << ((n % 4) * 4));
@@ -79,8 +99,9 @@ static inline void irq_exti_attach(uint16_t pin) {
   EXTI->FTSR |= BIT(n);
   int irqvec = n < 5 ? 6 + n : n < 10 ? 23 : 40;  // IRQ vector index, 10.1.2
   NVIC_SetPriority(irqvec, 3);
-  NVIC_EnableIRQ(irqvec);
-}
+  NVIC_EnableIRQ(irqvec);}
+*/
+
 /*
 #ifndef UART_DEBUG
 #define UART_DEBUG USART3
@@ -126,7 +147,7 @@ static inline uint8_t uart_read_byte(USART_TypeDef *uart) {
   return (uint8_t) (uart->DR & 255);
 }
 */
-
+/*
 static inline void rng_init(void) {
   RCC->AHB2ENR |= RCC_AHB2ENR_RNGEN;
   RNG->CR |= RNG_CR_RNGEN;
@@ -135,15 +156,16 @@ static inline uint32_t rng_read(void) {
   while ((RNG->SR & RNG_SR_DRDY) == 0) (void) 0;
   return RNG->DR;
 }
-
-#define UUID ((uint8_t *) UID_BASE)  // Unique 96-bit chip ID. TRM 39.1
-
+*/
+//#define UUID ((uint8_t *) UID_BASE)  // Unique 96-bit chip ID. TRM 39.1
+/*
 // Helper macro for MAC generation
 #define GENERATE_LOCALLY_ADMINISTERED_MAC()                        \
   {                                                                \
     2, UUID[0] ^ UUID[1], UUID[2] ^ UUID[3], UUID[4] ^ UUID[5],    \
         UUID[6] ^ UUID[7] ^ UUID[8], UUID[9] ^ UUID[10] ^ UUID[11] \
   }
+*/
 
 static inline bool timer_expired(volatile uint32_t *t, uint32_t prd,
                                  uint32_t now) {
@@ -190,6 +212,6 @@ while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL){;}
 
 RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG
 SysTick_Config(/*SystemCoreClock*/SYS_FREQUENCY / 1000);  // Sys tick every 1ms
-//SystemCoreClockUpdate();
+//SystemCoreClockUpdate(); undef reference
 
 }

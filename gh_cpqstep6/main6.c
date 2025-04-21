@@ -8,7 +8,8 @@ int main(void) {
 uint16_t ld2 = PIN('B',0x07); // PB7  blue
 uint16_t ld3 = PIN('B',0x0e); // PB14 red
 //clock_init();
-gpio_output(ld2);       // Set blue LED to output mode
+//gpio_output(ld2);       // Set blue LED to output mode
+gpio_set_mode(ld2, GPIO_MODE_OUTPUT);
 gpio_output(ld3);
   //uart_init(UART_DEBUG, 115200);              // Initialise UART
 volatile uint32_t timer_blue = 0, period_blue = 500;  // declareTimers
