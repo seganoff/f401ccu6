@@ -89,7 +89,7 @@ static inline void gpio_set_af(uint16_t pin, uint8_t af_num) {
   gpio->AFR[n >> 3] &= ~(15UL << ((n & 7) * 4));
   gpio->AFR[n >> 3] |= ((uint32_t) af_num) << ((n & 7) * 4);
 }
-/* for step6 ?
+/* for step6 ?*/
 static inline void irq_exti_attach(uint16_t pin) {
   uint8_t bank = (uint8_t) (PINBANK(pin)), n = (uint8_t) (PINNO(pin));
   SYSCFG->EXTICR[n / 4] &= ~(15UL << ((n % 4) * 4));
@@ -100,7 +100,7 @@ static inline void irq_exti_attach(uint16_t pin) {
   int irqvec = n < 5 ? 6 + n : n < 10 ? 23 : 40;  // IRQ vector index, 10.1.2
   NVIC_SetPriority(irqvec, 3);
   NVIC_EnableIRQ(irqvec);}
-*/
+//*/
 
 /*
 #ifndef UART_DEBUG
@@ -147,7 +147,7 @@ static inline uint8_t uart_read_byte(USART_TypeDef *uart) {
   return (uint8_t) (uart->DR & 255);
 }
 */
-/*
+
 static inline void rng_init(void) {
   RCC->AHB2ENR |= RCC_AHB2ENR_RNGEN;
   RNG->CR |= RNG_CR_RNGEN;
@@ -156,7 +156,8 @@ static inline uint32_t rng_read(void) {
   while ((RNG->SR & RNG_SR_DRDY) == 0) (void) 0;
   return RNG->DR;
 }
-*/
+ //not in step7 hal.h
+
 //#define UUID ((uint8_t *) UID_BASE)  // Unique 96-bit chip ID. TRM 39.1
 /*
 // Helper macro for MAC generation
@@ -166,6 +167,14 @@ static inline uint32_t rng_read(void) {
         UUID[6] ^ UUID[7] ^ UUID[8], UUID[9] ^ UUID[10] ^ UUID[11] \
   }
 */
+
+static inline void systick_init(uint32_t ticks) {
+if ((ticks - 1) > 0xffffff) return;  // Systick timer is 24 bit
+SysTick->LOAD = ticks - 1;
+SysTick->VAL = 0;
+SysTick->CTRL = BIT(0) | BIT(1) | BIT(2);  // Enable systick
+RCC->APB2ENR |= BIT(14);                   // Enable SYSCFG
+}
 
 static inline bool timer_expired(volatile uint32_t *t, uint32_t prd,
                                  uint32_t now) {
@@ -210,8 +219,11 @@ RCC->CFGR |= RCC_CFGR_SW_PLL;
 /* Wait till the main PLL is used as system clock source */
 while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL){;}
 
-RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG
+//RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG, not in 7
+//step 7 enable syscfg done in hal.h:systick_init & in main.c straight after enableirq(ETH_IRQn)
+//but come_cm7.h:2564, there is no call to enable syscfg+addiotional nvic_setPriority
 SysTick_Config(/*SystemCoreClock*/SYS_FREQUENCY / 1000);  // Sys tick every 1ms
+RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 //SystemCoreClockUpdate(); undef reference
 
 }

@@ -10,6 +10,7 @@ int main(void) {
 uint16_t ld2 = PIN('B',0x07); // PB7  blue
 uint16_t ld3 = PIN('B',0x0e); // PB14 red
 //clock_init(); > startup_stm767.s > SystemInit 
+//systick_init(SYS_FREQUENCY / 1000);    // Tick every 1 ms
 gpio_set_mode(ld2, GPIO_MODE_OUTPUT);
 gpio_output(ld3);
 volatile uint32_t timer_blue = 0, period_blue = 500;  // declareTimers
@@ -47,7 +48,7 @@ if (timer_expired(&timer_blue, period_blue, s_ticks)) {
 static bool on; gpio_write(ld2, on);on = !on;}
 
 if (timer_expired(&timer_red, period_red, s_ticks)) {
-static bool on; gpio_write(ld3,on);on=!on;}
+static bool on; gpio_write(ld3, on);on=!on;}
 
 mg_mgr_poll(&mgr, 0);  // Handle networking
 
