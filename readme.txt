@@ -226,3 +226,31 @@ check weather macroFunctions from hal.h like bit,pin,pinno,pinbank,setbits are a
 not getting ip assignt by dhcp, anyway i dont wanna dig deeper why, so step 7 compiles & runs, 
 but not tested the actual dashboard. maybe some other time
 ---------- done for now---------------------
+
+----------attempt ++ -----------------------
+from cube (no mongoose) , from mongoose wizard , this
+this cube yakker
+ls -R ./
+767.ioc  Core  Makefile  startup_stm32f767xx.s  STM32F767XX_FLASH.ld
+./Core:
+Inc  Src
+./Core/Inc:
+main.h  stm32_assert.h  stm32f7xx_it.h
+./Core/Src:
+main.c  stm32f7xx_it.c  syscalls.c  sysmem.c  system_stm32f7xx.c
+
+starting point wizzard. 
+link.ld adjusted but needs digging deeper bout the user_heap_stack
+Makefile adjusted
+main.c touched, maybe incomplete
+hal.c adjusted syscalls.c went into hal.c  SystemInit{system_init}//called by startup.S
+hal_init: clock_init, systick_config(sys_frequency/1000), rng_init, leds_init, ethernet_init
+
+
+
+
+
+
+
+
+
