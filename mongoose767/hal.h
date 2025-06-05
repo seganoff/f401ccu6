@@ -166,7 +166,10 @@ static inline void wizard_clock_init(void) {
   while ((RCC->CFGR & 12) == 0) (void) 0;           // Wait until done
   RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;             // Enable SYSCFG
 }
-//TODO supply clock init, using cubes's alg, but no ll or hal calls > bare register access(use stm32f767xx.h)
+//STM32Cube/Repository/STM32Cube_FW_F7_V1.17.3/Drivers/STM32F7xx_HAL_Driver$ 
+//grep -C 2 -n -r 'LL_RCC_SetTIMPrescaler' {Src,Inc}
+//WIP supply clock init, using cubes's alg, but no ll or hal calls > bare register access(use stm32f767xx.h)
+//ctag -R * pinche f7Cube & ctrl ](checkout tutorial for other cool shortcuts) !!FU!! cube multiple times
 static inline void clock_init(void){
 //cube main
 SCB_EnableICache(); SCB_EnableDCache();//core_cm7.h:2229 static_inline voids
