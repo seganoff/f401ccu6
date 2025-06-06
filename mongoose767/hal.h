@@ -169,26 +169,38 @@ static inline void wizard_clock_init(void) {
 //STM32Cube/Repository/STM32Cube_FW_F7_V1.17.3/Drivers/STM32F7xx_HAL_Driver$ 
 //grep -C 2 -n -r 'LL_RCC_SetTIMPrescaler' {Src,Inc}
 //WIP supply clock init, using cubes's alg, but no ll or hal calls > bare register access(use stm32f767xx.h)
-//ctag -R * pinche f7Cube & ctrl ](checkout tutorial for other cool shortcuts) !!FU!! cube multiple times
+//ctag -R * pinche f7Cube & ctrl ](checkout tutorial for other cool shortcuts) !!FU!! cube, multiple times
+//stm32f7xx.h:181-195
+//#define SET_BIT(REG, BIT)     ((REG) |= (BIT))
+//#define CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT))
+//#define READ_BIT(REG, BIT)    ((REG) & (BIT))
+//#define CLEAR_REG(REG)        ((REG) = (0x0))
+//#define WRITE_REG(REG, VAL)   ((REG) = (VAL))
+//#define READ_REG(REG)         ((REG))
+//#define MODIFY_REG(REG, CLEARMASK, SETMASK)  WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
+//val = reg & ~clearmask | setmask
+//reg = val
 static inline void clock_init(void){
 //cube main
 SCB_EnableICache(); SCB_EnableDCache();//core_cm7.h:2229 static_inline voids
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick.
-  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
-  LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
-  system interrupt init
-  NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
-main.h #define NVIC_PRIORITYGROUP_4 ((uint32_t)0x00000003) 4 bits for pre-emption priority, 0 bit subprio
-  config system clock
-  SystemClock_Config();gpio_init; uart3_init; while(1)//main loop
-
-
-  * @brief System Clock Configuration
-  * @retval None
-
-void SystemClock_Config(void)
-{
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);
+//Reset of all peripherals, Initializes the Flash interface and the Systick.
+//LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+//         \/                  /\ *ll_bus.h defRemap to RCC_APB1ENR_PWREN 767xx.h;
+//__IO uint32_t tmpreg;SET_BIT(RCC->APB1ENR, Periphs);//__IO volatile -r '#define\s*__IO' cmsis5
+//tmpreg = READ_BIT(RCC->APB1ENR, Periphs);(void)tmpreg;//??for what?? Delay after an RCC peripheral clock enabling
+// fu cube, wtf is grp1?
+RCC->APB1ENR|=RCC_APB1ENR_PWR;//LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+RCC->APB2ENR|=RCC_APB2ENR_SYSCFGEN;//LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
+//system interrupt init
+//(void)((uint32_t)0x00000003U) ??? NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4/*hal_cortex.h*/);
+//BS from cube: main.h #define NVIC_PRIORITYGROUP_4 ((uint32_t)0x00000003) 4 bits for pre-emption priority, 0 bit subprio
+//config system clock
+//SystemClock_Config();gpio_init; uart3_init; while(1)//main loop
+//void SystemClock_Config(void)
+//{
+  LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);// MODIFY_REG(FLASH->ACR, FLASH_ACR_LATENCY, Latency);
+//val = flash->rcc & ~flash_acr_latency | latency7
+//val =  & ~0x0000000F | 0x00000007U
   while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_7)
   {
   }
@@ -227,11 +239,9 @@ void SystemClock_Config(void)
   LL_Init1msTick(216000000);
   LL_SetSystemCoreClock(216000000);
 
- Set Timers Clock Prescalers
-  LL_RCC_SetTIMPrescaler(LL_RCC_TIM_PRESCALER_TWICE);
-}
-
-  */
+  //Set Timers Clock Prescalers
+  //LL_RCC_SetTIMPrescaler(LL_RCC_TIM_PRESCALER_TWICE);
+}//close SystemClock_Config
 }//close clock_init
 
 static inline void system_init(void) {
