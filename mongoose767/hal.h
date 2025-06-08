@@ -28,10 +28,10 @@ APB1 clock <= 54MHz; APB2 clock <= 108MHz
 3.3.2, Table 5: configure flash latency (WS) in accordance to clock freq
 38.4: The AHB clock frequency must be at least 25 MHz when the Ethernet
 controller is used */
-enum { APB1_PRE = 5 /* AHB clock / 4 */, APB2_PRE = 4 /* AHB clock / 2 */ };
-enum { PLL_HSI = 16, PLL_M = 8, PLL_N = 216, PLL_P = 2 };  // Run at 216 Mhz
+enum { APB1_PRE = 4 /* AHB clock / 4 */, APB2_PRE = 2 /* AHB clock / 2 */ };
+enum { /*PLL_HSI=16*/OSC_IN=8,PLL_M=4,PLL_N=216,PLL_P=2,PLL_Q=9,PLL_R=2};  // Run at 216 Mhz
 #define FLASH_LATENCY 7
-#define SYS_FREQUENCY ((PLL_HSI * PLL_N / PLL_M / PLL_P) * 1000000)
+#define SYS_FREQUENCY ((/*PLL_HSI*/OSC_IN * PLL_N / PLL_M / PLL_P) * 1000000)
 #define APB2_FREQUENCY (SYS_FREQUENCY / (BIT(APB2_PRE - 3)))
 #define APB1_FREQUENCY (SYS_FREQUENCY / (BIT(APB1_PRE - 3)))
 
@@ -189,7 +189,7 @@ SCB_EnableICache(); SCB_EnableDCache();//core_cm7.h:2229 static_inline voids
 //__IO uint32_t tmpreg;SET_BIT(RCC->APB1ENR, Periphs);//__IO volatile -r '#define\s*__IO' cmsis5
 //tmpreg = READ_BIT(RCC->APB1ENR, Periphs);(void)tmpreg;//??for what?? Delay after an RCC peripheral clock enabling
 // fu cube, wtf is grp1?
-RCC->APB1ENR|=RCC_APB1ENR_PWR;//LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+RCC->APB1ENR|=RCC_APB1ENR_PWREN;//LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 RCC->APB2ENR|=RCC_APB2ENR_SYSCFGEN;//LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
 //system interrupt init
 //(void)((uint32_t)0x00000003U) ??? NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4/*hal_cortex.h*/);
@@ -198,50 +198,61 @@ RCC->APB2ENR|=RCC_APB2ENR_SYSCFGEN;//LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIP
 //SystemClock_Config();gpio_init; uart3_init; while(1)//main loop
 //void SystemClock_Config(void)
 //{
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);// MODIFY_REG(FLASH->ACR, FLASH_ACR_LATENCY, Latency);
+//LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);// MODIFY_REG(FLASH->ACR, FLASH_ACR_LATENCY, Latency);
+FLASH->ACR |= (FLASH_LATENCY | BIT(8) | BIT(9) );
 //val = flash->rcc & ~flash_acr_latency | latency7
 //val =  & ~0x0000000F | 0x00000007U
-  while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_7)
-  {
-  }
-  LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
-  LL_PWR_EnableOverDriveMode();
-  LL_RCC_HSE_EnableBypass();
-  LL_RCC_HSE_Enable();
+//while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_7){} return (uint32_t)(READ_BIT(FLASH->ACR, FLASH_ACR_LATENCY));
+while((FLASH->ACR&FLASH_ACR_LATENCY)!=FLASH_ACR_LATENCY_7WS){}
+//LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);//MODIFY_REG(PWR->CR1, PWR_CR1_VOS, VoltageScaling);
+//ll_pwr.h:104-106                            767xx.h
+//#define LL_PWR_REGU_VOLTAGE_SCALE3         PWR_CR1_VOS_0
+//#define LL_PWR_REGU_VOLTAGE_SCALE2         PWR_CR1_VOS_1
+//#define LL_PWR_REGU_VOLTAGE_SCALE1         (PWR_CR1_VOS_0 | PWR_CR1_VOS_1)
+PWR->CR1|=(PWR_CR1_VOS_0|PWR_CR1_VOS_1|PWR_CR1_ODEN);//Entering Over-drive mode rm0410 ink125
+//LL_PWR_EnableOverDriveMode();//SET_BIT(PWR->CR1, PWR_CR1_ODEN)
+//LL_RCC_HSE_EnableBypass();//SET_BIT(RCC->CR, RCC_CR_HSEBYP);
+//LL_RCC_HSE_Enable();//SET_BIT(RCC->CR, RCC_CR_HSEON);
+RCC->CR|=(RCC_CR_HSEBYP|RCC_CR_HSEON);
+//Wait till HSE is ready 
+//while(LL_RCC_HSE_IsReady() != 1){}return (READ_BIT(RCC->CR, RCC_CR_HSERDY) == (RCC_CR_HSERDY));
+while((RCC->CR & RCC_CR_HSERDY)!=RCC_CR_HSERDY){}
+//LL_RCC_HSE_EnableCSS();//SET_BIT(RCC->CR, RCC_CR_CSSON);
+RCC->CR|=RCC_CR_CSSON;
+//LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_4, 216, LL_RCC_PLLP_DIV_2);
+//MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLP,
+//          Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLP);
+RCC->PLLCFGR = (RCC_PLLCFGR_PLLSRC_HSE)      /*0x0040_0000 0x0040_0000 */
+| (PLL_M<<RCC_PLLCFGR_PLLM_Pos)              /*0x0000_0008 0x0040_0008 */
+| (PLL_N << RCC_PLLCFGR_PLLN_Pos)            /*0x0000_3600 0x0040_3608 */
+| (((PLL_P >> 1) -1) << RCC_PLLCFGR_PLLP_Pos)/*0x0000_0000 0x0040_3608 2:00;4:01;6:10;8:11*/
+| (PLL_Q<<RCC_PLLCFGR_PLLQ_Pos)              /*0x0900_0000 0x0940_3608 */
+| (PLL_R<<RCC_PLLCFGR_PLLR_Pos)              /*0x2000_0000 0x2940_3608.assert_equals(RCC_PLLCFGR) */
+;
 
- Wait till HSE is ready 
-  while(LL_RCC_HSE_IsReady() != 1)
-  {
+//LL_RCC_PLL_Enable();//SET_BIT(RCC->CR, RCC_CR_PLLON);
+RCC->CR|=RCC_CR_PLLON;
 
-  }
-  LL_RCC_HSE_EnableCSS();
-  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_4, 216, LL_RCC_PLLP_DIV_2);
-  LL_RCC_PLL_Enable();
+//Wait till PLL is ready
+//while(LL_RCC_PLL_IsReady() != 1){}return (READ_BIT(RCC->CR, RCC_CR_PLLRDY) == (RCC_CR_PLLRDY));
+while((RCC->CR&RCC_CR_PLLRDY)!=RCC_CR_PLLRDY){}
+//while (LL_PWR_IsActiveFlag_VOS() == 0){}return (READ_BIT(PWR->CSR1, PWR_CSR1_VOSRDY) == (PWR_CSR1_VOSRDY));
+while((PWR->CSR1&PWR_CSR1_VOSRDY)!=PWR_CSR1_VOSRDY){}
+//LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);MODIFY_REG(RCC->CFGR, RCC_CFGR_HPRE, Prescaler);
+//LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_4);MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE1, Prescaler);
+//LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_2);MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE2, Prescaler);
+//LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);MODIFY_REG(RCC->CFGR, RCC_CFGR_SW, Source);
+RCC->CFGR|= RCC_CFGR_HPRE_DIV1|RCC_CFGR_PPRE1_DIV4|RCC_CFGR_PPRE2_DIV2|RCC_CFGR_SW_PLL;
 
-  Wait till PLL is ready
-  while(LL_RCC_PLL_IsReady() != 1)
-  {
+//wait till System clock is ready
+//while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL){}return (uint32_t)(READ_BIT(RCC->CFGR, RCC_CFGR_SWS));
+while((RCC->CFGR&/*sws set by HW*/RCC_CFGR_SWS)!=RCC_CFGR_SWS_PLL){}
+//LL_Init1msTick(216000000);//ll_inittick, same as systick_init(cpq)
+//LL_SetSystemCoreClock(216000000);SystemCoreClock = HCLKFrequency;
 
-  }
-  while (LL_PWR_IsActiveFlag_VOS() == 0)
-  {
-  }
-  LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-  LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_4);
-  LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_2);
-  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-
- Wait till System clock is ready
-  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
-  {
-
-  }
-  LL_Init1msTick(216000000);
-  LL_SetSystemCoreClock(216000000);
-
-  //Set Timers Clock Prescalers
-  //LL_RCC_SetTIMPrescaler(LL_RCC_TIM_PRESCALER_TWICE);
-}//close SystemClock_Config
+//Set Timers Clock Prescalers
+//LL_RCC_SetTIMPrescaler(LL_RCC_TIM_PRESCALER_TWICE);MODIFY_REG(RCC->DCKCFGR1, RCC_DCKCFGR1_TIMPRE, Prescaler);
+//}//close SystemClock_Config
 }//close clock_init
 
 static inline void system_init(void) {

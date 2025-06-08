@@ -144,6 +144,6 @@ void SystemInit(void){
 //locm();
 //ll_template();
 //p531();
-clock_init();
+clock_init();// > hal.h
 }
 
