@@ -1,6 +1,6 @@
 #include "hal.h"
 
-uint32_t SystemCoreClock = SYS_FREQUENCY;
+//uint32_t SystemCoreClock = SYS_FREQUENCY;
 //hal.h > stm32f767xx.h > system_stm32f7xx.h: system_exported_functions\/
 //extern void SystemInit(void);extern void SystemCoreClockUpdate(void);
 //Called from cmsis_f7/Source/Templates/gcc/startup_stm32f767xx.s:61 bl SystemInit
@@ -19,89 +19,9 @@ void cpqHSI(void) {
   SysTick_Config(SystemCoreClock / 1000);  // Sys tick every 1ms
 }
 
-
-
-//(arm)systemControlBlock->coprocessorAccessControlRegister
-//SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));
-//FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      
-
-//void rcc_clock_setup_hse(const struct rcc_clock_scale *clock, uint32_t hse_mhz)
-void locm(void){
-//uint8_t pllm = hse_mhz;
-/* Enable internal high-speed oscillator.
-rcc_osc_on(RCC_HSI);rcc_wait_for_osc_ready(RCC_HSI);*/
-/* Select HSI as SYSCLK source. rcc_set_sysclk_source(RCC_CFGR_SW_HSI);*/
-/* Enable external high-speed oscillator.
-rcc_osc_on(RCC_HSE);
-rcc_wait_for_osc_ready(RCC_HSE);rcc_periph_clock_enable(RCC_PWR);
-pwr_set_vos_scale(clock->vos_scale);
-if (clock->overdrive) pwr_enable_overdrive();
-*/
-/*Set prescalers for AHB, ADC, APB1, APB2.
-* Do this before touching the PLL (TODO: why?)
-rcc_set_hpre(clock->hpre);
-rcc_set_ppre1(clock->ppre1);
-rcc_set_ppre2(clock->ppre2);*/
-/* Disable PLL oscillator before changing its configuration.
-rcc_osc_off(RCC_PLL);*/
-/* Configure the PLL oscillator.
-rcc_set_main_pll_hse(pllm, clock->plln, clock->pllp, clock->pllq);*/
-/* Enable PLL oscillator and wait for it to stabilize.
-rcc_osc_on(RCC_PLL);rcc_wait_for_osc_ready(RCC_PLL);*/
-/* Configure flash settings.
-flash_set_ws(clock->flash_waitstates);
-flash_art_enable();
-flash_prefetch_enable();*/
-/* Select PLL as SYSCLK source. rcc_set_sysclk_source(RCC_CFGR_SW_PLL);*/
-/* Wait for PLL clock to be selected.rcc_wait_for_sysclk_status(RCC_PLL);*/
-/* Set the clock frequencies used.
-rcc_ahb_frequency = clock->ahb_frequency;
-rcc_apb1_frequency = clock->apb1_frequency;
-rcc_apb2_frequency = clock->apb2_frequency;*/
-/* Disable internal high-speed oscillator. rcc_osc_off(RCC_HSI);*/
-}//end locm
-
-//Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_system.h:891:
-//__STATIC_INLINE void LL_FLASH_SetLatency(uint32_t Latency)
-
-void ll_tempate(void){ //Templates_LL/Src/main.c
-
-//core_cm7.h:2229 static_inline voids
-SCB_EnableICache(); SCB_EnableDCache();
-// Set FLASH latency LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);
-SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
-FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, prefetch
-
-// Enable PWR clock LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR); RCC_APB1ENR_PWREN
-RCC->APB1ENR = RCC_APB1ENR_PWREN;
-// Activation OverDrive Mode LL_PWR_EnableOverDriveMode(); SET_BIT(PWR->CR1, PWR_CR1_ODEN);
-//while(LL_PWR_IsActiveFlag_OD() != 1){}; READ_BIT(PWR->CSR1, PWR_CSR1_ODRDY) == (PWR_CSR1_ODRDY));
-// Activation OverDrive Switching LL_PWR_EnableOverDriveSwitching(); SET_BIT(PWR->CR1, PWR_CR1_ODSWEN);
-//while(LL_PWR_IsActiveFlag_ODSW() != 1){};
-//need dig deeper about overdriveMode & scale modes & if still needed when pll as sysck
-  
-  /* Main PLL configuration and activation */
-  //LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI, LL_RCC_PLLM_DIV_16, 432, LL_RCC_PLLP_DIV_2);
-  //LL_RCC_PLL_Enable();
-  //while(LL_RCC_PLL_IsReady() != 1) {};
-  /* Sysclk activation on the main PLL */
-  //LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-  //LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-  //while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL){};
-  /* Set APB1 & APB2 prescaler*/
-  //LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_4);LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_2);
-  /* Set systick to 1ms */
-  SysTick_Config(216000000 / 1000);
-  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
-  SystemCoreClock = 216000000; 
-}//template
-
 //blog.embeddedexpert.io/?p=531
 void p531(void)//void SysClockConfig(void) //set the core frequency to 216MHz
 {
-//#define PLL_M      4
-//#define PLL_N      216
-//#define PLL_P      2
 __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
 RCC->CR |= RCC_CR_CSSON;
 RCC->CR |= RCC_CR_HSEBYP;
@@ -139,11 +59,48 @@ SysTick_Config(SystemCoreClock / 1000);  // Sys tick every 1ms
 //SystemCoreClockUpdate();
 }//p531
 
+static inline void clock_init_reworked(void){
+SCB_EnableICache(); SCB_EnableDCache();
+RCC->APB1ENR|=RCC_APB1ENR_PWREN;
+RCC->APB2ENR|=RCC_APB2ENR_SYSCFGEN;
+FLASH->ACR|=(FLASH_LATENCY|FLASH_ACR_PRFTEN|FLASH_ACR_ARTEN);
+while((FLASH->ACR&FLASH_ACR_LATENCY)!=FLASH_ACR_LATENCY_7WS){}
+PWR->CR1|=(PWR_CR1_VOS_0|PWR_CR1_VOS_1|PWR_CR1_ODEN);
+RCC->CR|=(RCC_CR_HSEBYP|RCC_CR_HSEON);
+while((RCC->CR & RCC_CR_HSERDY)!=RCC_CR_HSERDY){}
+RCC->CR|=RCC_CR_CSSON;
+RCC->PLLCFGR=0x24003010;
+RCC->PLLCFGR=/*0x29403608;*/ (RCC_PLLCFGR_PLLSRC_HSE)      /*0x0040_0000 0x0040_0000 */
+| (PLL_M<<RCC_PLLCFGR_PLLM_Pos)              /*0x0000_0008 0x0040_0008 */
+| (PLL_N << RCC_PLLCFGR_PLLN_Pos)            /*0x0000_3600 0x0040_3608 */
+| (((PLL_P >> 1) -1) << RCC_PLLCFGR_PLLP_Pos)/*0x0000_0000 0x0040_3608 2:00;4:01;6:10;8:11*/
+| (PLL_Q<<RCC_PLLCFGR_PLLQ_Pos)              /*0x0900_0000 0x0940_3608 */
+| (PLL_R<<RCC_PLLCFGR_PLLR_Pos)              /*0x2000_0000 0x2940_3608.assert_equals(RCC_PLLCFGR) */
+;
+RCC->CR|=RCC_CR_PLLON;
+while((RCC->CR&RCC_CR_PLLRDY)!=RCC_CR_PLLRDY){}
+while((PWR->CSR1&PWR_CSR1_VOSRDY)!=PWR_CSR1_VOSRDY){}
+RCC->CFGR=0x0;
+RCC->CFGR|=RCC_CFGR_HPRE_DIV1;
+RCC->CFGR|=RCC_CFGR_PPRE1_DIV4;
+RCC->CFGR|=RCC_CFGR_PPRE2_DIV2;
+RCC->CFGR|=RCC_CFGR_SW_PLL;
+while((RCC->CFGR&RCC_CFGR_SWS)!=RCC_CFGR_SWS_PLL){}
+// systick & SystemCoreClock=216000000
+//uint32_t SystemCoreClock;
+//SystemCoreClock=216000000;SysTick_Config(SystemCoreClock/1000);
+//LL_RCC_SetTIMPrescaler(LL_RCC_TIM_PRESCALER_TWICE);MODIFY_REG(RCC->DCKCFGR1, RCC_DCKCFGR1_TIMPRE, Prescaler);
+}//clock init reworked end
+
 void SystemInit(void){
 //cpqHSI();
 //locm();
 //ll_template();
 //p531();
-clock_init();// > hal.h
+//clock_init();// > hal.h
+SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));//enable cp10 cp11 full access(FPU)
+__DSB();__ISB();//data/instr sync barrier cmsis_armcc.h:430
+clock_init_reworked();
+//cpqHSI();
 }
 

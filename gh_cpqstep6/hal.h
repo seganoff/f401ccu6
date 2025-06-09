@@ -20,18 +20,15 @@
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))
 #define PINNO(pin) (pin & 255)
 #define PINBANK(pin) (pin >> 8)
-
-// 6.3.3: APB1 clock <= 45MHz; APB2 clock <= 90MHz
-// 3.5.1, Table 11: configure flash latency (WS) in accordance to clock freq
-// 33.4: The AHB clock must be at least 25 MHz when Ethernet is used
-//enum { APB1_PRE = 5 /* AHB clock / 4 */, APB2_PRE = 4 /* AHB clock / 2 */ };
-//enum { PLL_HSI = 16, PLL_M = 8, PLL_N = 180, PLL_P = 2 };  // Run at 180 Mhz
+//uint32_t SystemCoreClock;
 enum { APB1_PRE = 4 /* AHB clock / 4 */, APB2_PRE = 2 /* AHB clock / 2 */ };
-enum { OSC_IN = 8, PLL_M = 4, PLL_N = 216, PLL_P = 2 };
+enum {OSC_IN=8,PLL_M=4,PLL_N=216,PLL_P=2,PLL_Q=9,PLL_R=2};
+//enum { PLL_HSI = 16, PLL_M = 8, PLL_N = 216, PLL_P = 2 };  // Run at 216 Mhz
+//#define OSC_IN 16
 #define FLASH_LATENCY 7
 #define SYS_FREQUENCY ((OSC_IN * PLL_N / PLL_M / PLL_P) * 1000000)
-#define APB2_FREQUENCY (SYS_FREQUENCY / (BIT(APB2_PRE - 3)))
-#define APB1_FREQUENCY (SYS_FREQUENCY / (BIT(APB1_PRE - 3)))
+//#define APB2_FREQUENCY (SYS_FREQUENCY / (BIT(APB2_PRE - 3)))
+//#define APB1_FREQUENCY (SYS_FREQUENCY / (BIT(APB1_PRE - 3)))
 
 static inline void spin(volatile uint32_t count) {while (count--) /*(void) 0;*/asm("nop");}
 
@@ -184,46 +181,37 @@ static inline bool timer_expired(volatile uint32_t *t, uint32_t prd,
   *t = (now - *t) > prd ? now + prd : *t + prd;  // Next expiration time
   return true;                                   // Expired, return true
 }
-
+/*
 static inline void clock_init(void){
 //core_cm7.h:2229 static_inline voids
 SCB_EnableICache(); SCB_EnableDCache();
 // Set FLASH latency LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);
 SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));  // Enable FPU
 FLASH->ACR |= FLASH_LATENCY | BIT(8) | BIT(9);      // Flash latency, prefetch
-
 RCC->CR |= RCC_CR_CSSON;
 RCC->CR |= RCC_CR_HSEBYP;
 RCC->CR |= ((uint32_t)RCC_CR_HSEON);
-
-//RCC->APB1ENR = RCC_APB1ENR_PWREN;
 RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-PWR->CR1 &= (uint32_t)~(PWR_CR1_VOS);//TODO voltage scale 1 as in examples
+PWR->CR1 &= (uint32_t)~(PWR_CR1_VOS);
 RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
 RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
 RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
-
 RCC->PLLCFGR = 
   PLL_M |
  (PLL_N << RCC_PLLCFGR_PLLN_Pos) |
  (((PLL_P >> 1) -1) << RCC_PLLCFGR_PLLP_Pos) |
  (RCC_PLLCFGR_PLLSRC_HSE)
 ;
-//TODO PLL_R
-
 RCC->CR |= RCC_CR_PLLON;
 while((RCC->CR & RCC_CR_PLLRDY) == 0){;}
-
 RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
 RCC->CFGR |= RCC_CFGR_SW_PLL;
-/* Wait till the main PLL is used as system clock source */
+// Wait till the main PLL is used as system clock source
 while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL){;}
-
 //RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;    // Enable SYSCFG, not in 7
 //step 7 enable syscfg done in hal.h:systick_init & in main.c straight after enableirq(ETH_IRQn)
 //but come_cm7.h:2564, there is no call to enable syscfg+addiotional nvic_setPriority
-SysTick_Config(/*SystemCoreClock*/SYS_FREQUENCY / 1000);  // Sys tick every 1ms
+//SysTick_Config(SYS_FREQUENCY / 1000);  // Sys tick every 1ms
 RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 //SystemCoreClockUpdate(); undef reference
-
-}
+}*/
