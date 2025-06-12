@@ -226,8 +226,20 @@ check weather macroFunctions from hal.h like bit,pin,pinno,pinbank,setbits are a
 not getting ip assignt by dhcp, anyway i dont wanna dig deeper why, so step 7 compiles & runs, 
 but not tested the actual dashboard. maybe some other time
 ---------- done for now---------------------
-
 ----------attempt ++ -----------------------
+it actually works, its all f7 specific behaviour MPU
+
+I would suggest you check your Memory Protection Unit settings: ETH-related memory should be allowed to be modified by DMA (by default it's not).
+It is not a problem from Errata. I saw that in the past and the solution was the proper MPU configuration and proper size and 
+alignment of Ethernet DMA buffers. hxxp://stackoverflow.com/questions/50834140/stm32-eth-irqhandler-never-hit
+&
+https://github.com/htibosch/freertos_plus_projects/blob/master/plus/stm32F7/stm32f746.ld
+Do you enable data caching by calling SCB_EnableDCache() ?
+If so, have you put the DMA buffers in non-cached memory?
+See this readme.md (gh/FreeRTOS/FreeRTOS-Plus-TCP) about non-cached memory.
+
+
+
 
 
 
