@@ -30,4 +30,4 @@ void pend_sv_handler(void){xPortPendSVHandler();}
 void sys_tick_handler(void){xPortSysTickHandler();}
 /* end opncm3.c */"
 
-echo -n "${opencm3}" > opencm3.c
+//echo -n "${opencm3}" > opencm3.c

@@ -1,33 +1,21 @@
-/* ----
- * PA11		USB_DM
- * PA12		USB_DP
- */
-
+//PA11		USB_DM
+//PA12		USB_DP
 #include <stdlib.h>
 #include <string.h>
-
 #include <libopencm3/cm3/scb.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/cdc.h>
 #include <libopencm3/cm3/scb.h>
-
 #include <libopencm3/usb/dwc/otg_common.h>
 #include <libopencm3/usb/dwc/otg_fs.h>
-
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
-#include <stdbool.h>//?
-
+#include <stdbool.h>
 #include "usbcdc.h"
-//#include "miniprintf.h"
-//#include "getline.h"
-
-// True when USB configured:
-static volatile bool initialized = false;
-
+static volatile bool initialized = false;// True when USB configured:
 static QueueHandle_t usb_txq;	// USB transmit queue
 static QueueHandle_t usb_rxq;	// USB receive queue
 
@@ -45,43 +33,30 @@ static const struct usb_device_descriptor dev = {
 	.iManufacturer = 1,
 	.iProduct = 2,
 	.iSerialNumber = 3,
-	.bNumConfigurations = 1,
-};
-
-/*
- * This notification endpoint isn't implemented. According to CDC spec it's
+	.bNumConfigurations = 1,};
+/* This notification endpoint isn't implemented. According to CDC spec it's
  * optional, but its absence causes a NULL pointer dereference in the
- * Linux cdc_acm driver. (Gareth McMullin <gareth@blacksphere.co.nz>)
- */
-static const struct usb_endpoint_descriptor comm_endp[] = {
-	{
+ * Linux cdc_acm driver. (Gareth McMullin <gareth@blacksphere.co.nz>)*/
+static const struct usb_endpoint_descriptor comm_endp[] = {{
 		.bLength = USB_DT_ENDPOINT_SIZE,
 		.bDescriptorType = USB_DT_ENDPOINT,
 		.bEndpointAddress = 0x83,
 		.bmAttributes = USB_ENDPOINT_ATTR_INTERRUPT,
 		.wMaxPacketSize = 16,
-		.bInterval = 255,
-	}
-};
-
-static const struct usb_endpoint_descriptor data_endp[] = {
-	{
+		.bInterval = 255,}};
+static const struct usb_endpoint_descriptor data_endp[] = {{
 		.bLength = USB_DT_ENDPOINT_SIZE,
 		.bDescriptorType = USB_DT_ENDPOINT,
 		.bEndpointAddress = 0x01,
 		.bmAttributes = USB_ENDPOINT_ATTR_BULK,
 		.wMaxPacketSize = 64,
-		.bInterval = 1,
-	}, {
+		.bInterval = 1,}, {
 		.bLength = USB_DT_ENDPOINT_SIZE,
 		.bDescriptorType = USB_DT_ENDPOINT,
 		.bEndpointAddress = 0x82,
 		.bmAttributes = USB_ENDPOINT_ATTR_BULK,
 		.wMaxPacketSize = 64,
-		.bInterval = 1,
-	}
-};
-
+		.bInterval = 1,}};
 static const struct {
 	struct usb_cdc_header_descriptor header;
 	struct usb_cdc_call_management_descriptor call_mgmt;
@@ -113,12 +88,8 @@ static const struct {
 		.bDescriptorType = CS_INTERFACE,
 		.bDescriptorSubtype = USB_CDC_TYPE_UNION,
 		.bControlInterface = 0,
-		.bSubordinateInterface0 = 1,
-	 }
-};
-
-static const struct usb_interface_descriptor comm_iface[] = {
-	{
+		.bSubordinateInterface0 = 1,}};
+static const struct usb_interface_descriptor comm_iface[] = {{
 		.bLength = USB_DT_INTERFACE_SIZE,
 		.bDescriptorType = USB_DT_INTERFACE,
 		.bInterfaceNumber = 0,
@@ -128,16 +99,10 @@ static const struct usb_interface_descriptor comm_iface[] = {
 		.bInterfaceSubClass = USB_CDC_SUBCLASS_ACM,
 		.bInterfaceProtocol = USB_CDC_PROTOCOL_AT,
 		.iInterface = 0,
-
 		.endpoint = comm_endp,
-
 		.extra = &cdcacm_functional_descriptors,
-		.extralen = sizeof(cdcacm_functional_descriptors)
-	}
-};
-
-static const struct usb_interface_descriptor data_iface[] = {
-	{
+		.extralen = sizeof(cdcacm_functional_descriptors)}};
+static const struct usb_interface_descriptor data_iface[] = {{
 		.bLength = USB_DT_INTERFACE_SIZE,
 		.bDescriptorType = USB_DT_INTERFACE,
 		.bInterfaceNumber = 1,
@@ -147,20 +112,12 @@ static const struct usb_interface_descriptor data_iface[] = {
 		.bInterfaceSubClass = 0,
 		.bInterfaceProtocol = 0,
 		.iInterface = 0,
-		.endpoint = data_endp,
-	}
-};
-
-static const struct usb_interface ifaces[] = {
-	{
+		.endpoint = data_endp,}};
+static const struct usb_interface ifaces[] = {{
 		.num_altsetting = 1,
-		.altsetting = comm_iface,
-	}, {
+		.altsetting = comm_iface,}, {
 		.num_altsetting = 1,
-		.altsetting = data_iface,
-	}
-};
-
+		.altsetting = data_iface,}};
 static const struct usb_config_descriptor config = {
 	.bLength = USB_DT_CONFIGURATION_SIZE,
 	.bDescriptorType = USB_DT_CONFIGURATION,
@@ -170,23 +127,14 @@ static const struct usb_config_descriptor config = {
 	.iConfiguration = 0,
 	.bmAttributes = 0x80,
 	.bMaxPower = 0x32,
-	.interface = ifaces,
-};
-
+	.interface = ifaces,};
 static const char * usb_strings[] = {
 	"usbcdc.c driver",
 	"usbcdc module",
-	"usbcdcdemo",
-};
-
-// Buffer to be used for control requests.
-static uint8_t usbd_control_buffer[128];
-
-/*
- * USB Control Requests:
- */
-static enum usbd_request_return_codes
-cdcacm_control_request(
+	"usbcdcdemo",};
+static uint8_t usbd_control_buffer[128];// Buffer to be used for control requests.
+//USB Control Requests:
+static enum usbd_request_return_codes cdcacm_control_request(
   usbd_device *usbd_dev __attribute__((unused)),
   struct usb_setup_data *req,
   uint8_t **buf __attribute__((unused)),
@@ -196,14 +144,11 @@ cdcacm_control_request(
     struct usb_setup_data *req
   ) __attribute__((unused))
 ) {
-
 	switch (req->bRequest) {
 	case USB_CDC_REQ_SET_CONTROL_LINE_STATE:
-		/*
-		 * The Linux cdc_acm driver requires this to be implemented
+		 /* The Linux cdc_acm driver requires this to be implemented
 		 * even though it's optional in the CDC spec, and we don't
-		 * advertise it in the ACM functional descriptor.
-		 */
+		 * advertise it in the ACM functional descriptor.*/
 		return USBD_REQ_HANDLED;
 	case USB_CDC_REQ_SET_LINE_CODING:
 		if ( *len < sizeof(struct usb_cdc_line_coding) ) {
@@ -214,43 +159,27 @@ cdcacm_control_request(
 	return USBD_REQ_NOTSUPP;
 }
 
-/*
- * USB Receive Callback:
- */
-static void
-cdcacm_data_rx_cb(
+//USB Receive Callback:
+static void cdcacm_data_rx_cb(
   usbd_device *usbd_dev,
-  uint8_t ep __attribute__((unused))
-) {
+  uint8_t ep __attribute__((unused))) {
 	// How much queue capacity left?
 	unsigned rx_avail = uxQueueSpacesAvailable(usb_rxq);
 	char buf[64];	// rx buffer
 	int len, x;
-
-	if ( rx_avail <= 0 )
-		return;	// No space to rx
-
+	if ( rx_avail <= 0 ) return;	// No space to rx
 	// Bytes to read
 	len = sizeof buf < rx_avail ? sizeof buf : rx_avail;
-
 	// Read what we can, leave the rest:
 	len = usbd_ep_read_packet(usbd_dev,0x01,buf,len);
-
-	for ( x=0; x<len; ++x ) {
-		// Send data to the rx queue
-		xQueueSend(usb_rxq,&buf[x],0);
-	}
+	for (x=0;x<len;++x){/*Send data to the rx queue*/xQueueSend(usb_rxq,&buf[x],0);}
 }
 
-/*
- * USB Configuration:
- */
-static void
-cdcacm_set_config(
+//USB Configuration:
+static void cdcacm_set_config(
   usbd_device *usbd_dev,
   uint16_t wValue __attribute__((unused))
 ) {
-
 	usbd_ep_setup(usbd_dev,
 		0x01,
 		USB_ENDPOINT_ATTR_BULK,
@@ -266,19 +195,14 @@ cdcacm_set_config(
 		USB_REQ_TYPE_CLASS | USB_REQ_TYPE_INTERFACE,
 		USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
 		cdcacm_control_request);
-
 	initialized = true;
 }
 
-/*
- * USB Driver task:
- */
-static void
-usb_task(void *arg) {
+//USB Driver task:
+static void usb_task(void *arg) {
 	usbd_device *udev = (usbd_device *)arg;
 	char txbuf[32];
 	unsigned txlen = 0;
-
 	for (;;) {
 		usbd_poll(udev);			/* Allow driver to do it's thing */
 		if ( initialized ) {
@@ -295,87 +219,20 @@ usb_task(void *arg) {
 	}
 }
 
-/*
- * Put character to USB (blocks):
- */
-void
-usb_putc(char ch) {
-	static const char cr = '\r';
-
-	while ( !usb_ready() )
-		taskYIELD();
-
-	if ( ch == '\n' )
-		xQueueSend(usb_txq,&cr,portMAX_DELAY);
-	xQueueSend(usb_txq,&ch,portMAX_DELAY);
+//Write uncooked data:
+void usb_write(const char *buf,unsigned bytes) {
+while(bytes-->0){xQueueSend(usb_txq,buf,portMAX_DELAY);++buf;}
 }
 
-/*
- * Put string to USB:
- */
-void
-usb_puts(const char *buf) {
-
-	while ( *buf )
-		usb_putc(*buf++);
+//Get one character from USB (blocking):
+intusb_getc(void) {
+char ch; uint32_t rc;
+rc = xQueueReceive(usb_rxq,&ch,portMAX_DELAY);
+if ( rc != pdPASS )	return -1;
+return ch;
 }
 
-/*
- * USB vprintf() interface:
-int
-usb_vprintf(const char *format,va_list ap) {
-	return mini_vprintf_cooked(usb_putc,format,ap);
-}
-Printf to USB:
-int
-usb_printf(const char *format,...) {
-	int rc;
-	va_list args;
-
-	va_start(args,format);
-	rc = mini_vprintf_cooked(usb_putc,format,args);
-	va_end(args);
-	return rc;
-}
-*/
-
-/*
- * Write (always) uncooked data:
- */
-void
-usb_write(const char *buf,unsigned bytes) {
-
-	while ( bytes-- > 0 ) {
-		xQueueSend(usb_txq,buf,portMAX_DELAY);
-		++buf;
-	}
-}
-
-/*
- * Get one character from USB (blocking):
- */
-int
-usb_getc(void) {
-	char ch;
-	uint32_t rc;
-
-	rc = xQueueReceive(usb_rxq,&ch,portMAX_DELAY);
-	if ( rc != pdPASS )
-		return -1;
-	return ch;
-}
-
-/*
- * Get an edited input line
-int
-usb_getline(char *buf,unsigned bufsiz) {
-	return getline(buf,bufsiz,usb_getc,usb_putc);
-}
-*/
-
-/*
- * Start USB driver:
- */
+//Start USB driver:
 void usb_start(void) {
 usbd_device *udev = 0;
 usb_txq = xQueueCreate(128,sizeof(char));
@@ -387,16 +244,14 @@ rcc_periph_clock_enable(RCC_OTGFS);
 gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO11 | GPIO12);
 gpio_set_af(GPIOA, GPIO_AF10, GPIO11 | GPIO12);
 
-	// PA11=USB_DM, PA12=USB_DP
+// PA11=USB_DM, PA12=USB_DP
 /*
 #define USB_OTG_FS_BASE			(PERIPH_BASE_AHB2 + 0x00000)
 #define OTG_GCCFG			0x038
-
 #define OTG_FS_GCCFG		MMIO32(USB_OTG_FS_BASE + OTG_GCCFG)
 #define OTG_GCCFG_NOVBUSSENS	(1 << 21)
 */
 OTG_FS_GCCFG |= OTG_GCCFG_NOVBUSSENS;
-
 udev = usbd_init(
 &otgfs_usb_driver,
 &dev,
@@ -405,14 +260,11 @@ usb_strings,
 3,
 usbd_control_buffer,sizeof(usbd_control_buffer)
 );
-
 usbd_register_set_config_callback(udev,cdcacm_set_config);
 xTaskCreate(usb_task,"USB",200,udev,configMAX_PRIORITIES-1,NULL);
 }
 
-/*
- * Return True if the USB connection + driver initialized and ready.
- */
+//Return True if the USB connection + driver initialized and ready.
 bool usb_ready(void) {return initialized;}
-
 // End usbcdc.c
+//https://github.com/dhylands/libopencm3-usb-serial/blob/master/usb.c
